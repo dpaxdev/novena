@@ -111,9 +111,7 @@ namespace Novena_Reminder
         {
             nov = collectNovenaData();
             var task = new Task<bool>(() => SaveNovena());
-            task.ConfigureAwait(false);
             task.RunSynchronously();
-         
 
            
             // Page above us will be our master view.
