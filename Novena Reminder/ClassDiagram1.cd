@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="Novena_Reminder.Novena">
+    <Position X="0.5" Y="0.5" Width="3" />
+    <NestedTypes>
+      <Enum Name="Novena_Reminder.Novena.RecurrencePattern" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>Model\Novena.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Enum>
+    </NestedTypes>
+    <TypeIdentifier>
+      <HashCode>AAACAAACAABCAABAEAAAAARBAAAAAgAAAABUgECACAA=</HashCode>
+      <FileName>Model\Novena.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

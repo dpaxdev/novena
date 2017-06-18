@@ -1,0 +1,30 @@
+﻿<UserControl
+    x:Class="Novena_Reminder.View.NovenaItem"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:Novena_Reminder.View"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    d:DesignWidth="434" Height="44.264">
+
+    <Grid Height="34" VerticalAlignment="Top">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition x:Name="CounterColumn" Width="80"  />
+            <ColumnDefinition x:Name="MasterColumn"  />
+            <ColumnDefinition Width="53"/>
+            <ColumnDefinition x:Name="ActiveColumn" Width="60" />
+        </Grid.ColumnDefinitions>
+        <TextBlock x:Name="txtProgress" Grid.Column="1" HorizontalAlignment="Left" TextWrapping="Wrap" Text="{Binding Progress}" VerticalAlignment="Center" Width="234"  Height="32" Margin="0,1"/>
+
+        <TextBlock x:Name="txtNovennaName" Grid.Column="1" HorizontalAlignment="Left" TextWrapping="Wrap" Text="{Binding Name}" VerticalAlignment="Center" Width="234"  Height="32" Margin="0,1"/>
+        <StackPanel Grid.Column="2"  Orientation="Horizontal">
+            <TextBlock x:Name="symbolRecurrence" HorizontalAlignment="Left" Text="&#xE1CA;" VerticalAlignment="Center" Padding="3" Width="21" FontFamily="Segoe MDL2 Assets" MinWidth="0" MinHeight="0" Margin="2,4,2,0" Height="21" />
+            <TextBlock x:Name="symbolScheduled" HorizontalAlignment="Left" Text="&#xE787;" VerticalAlignment="Center" Padding="3" Width="21" FontFamily="Segoe MDL2 Assets" MinWidth="0" MinHeight="0" Margin="2,4,2,0" Height="21" />
+
+        </StackPanel>
+        <ToggleSwitch x:Name="toggleSwitch"   Grid.Column="3" Header="" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" OffContent="" OnContent="" MinWidth="46" RenderTransformOrigin="0.59,0.697" ScrollViewer.VerticalScrollBarVisibility="Disabled" Margin="7,0"/>
+
+
+    </Grid>
+</UserControl>

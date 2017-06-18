@@ -1,0 +1,83 @@
+﻿<Page
+    x:Class="Novena_Reminder.NovenaDetails"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:Novena_Reminder"
+    xmlns:controller="using:Novena_Reminder.Controller"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+    <Page.Resources>
+        <controller:BooleanToVisibilityConverter x:Key="Bool2Vis"  />
+        <controller:NullableBooleanToBooleanConverter x:Key="NullBool2Bool" />
+        <controller:DateTimeToTimeSpanConverter x:Key="DateTime2TimeSpan" />
+    </Page.Resources>
+    <Page.BottomAppBar>
+        <CommandBar>
+            <CommandBar.Content>
+                <Grid/>
+            </CommandBar.Content>
+            <AppBarButton x:Name="ButtonSave"    Label="Salvaza"   Click="ButtonSave_Click">
+                <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE74E;" FontSize="15" Margin="1,3,0,0"  />
+            </AppBarButton>
+            <AppBarButton x:Name="ButtonDelete"  Label="Sterge" Click="ButtonDelete_Click">
+                <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE74D;" FontSize="15" Margin="1,3,0,0"  />
+            </AppBarButton>
+            <AppBarButton x:Name="ButtonCancel" Label="Anuleaza modificari" Click="ButtonCancel_Click">
+                <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE711;" FontSize="15" Margin="1,3,0,0"  />
+            </AppBarButton>
+        </CommandBar>
+    </Page.BottomAppBar>
+
+    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+        <Grid  Background="{ThemeResource AppBarBackgroundThemeBrush}" VerticalAlignment="Top" Margin="0">
+            <TextBlock x:Name="pageTitle"  FontSize="18" FontWeight="Light" TextWrapping="NoWrap" Height="33" 
+                          VerticalAlignment="Top"
+                          Padding="25,5,5,5" Margin="0"                          
+                          Foreground="{ThemeResource AppBarItemForegroundThemeBrush}" 
+                          IsTextScaleFactorEnabled="False" >
+                    <Run x:Name="lblNovennaDetailsActionType"/>
+                    <Run Text="Novena" />
+            </TextBlock>
+            <ToggleSwitch x:Name="togIsActive" OffContent="Activa" OnContent="Inactiva" HorizontalAlignment="Right" Width="60" Margin="0,-2,10,2" MinWidth="100" />
+        </Grid>
+        <StackPanel Margin="20,50,20,10">
+        <StackPanel x:Name="StatusPanel" Orientation="Vertical" >
+            <TextBlock x:Name="lblStatus" Text="Ziua 5/9"></TextBlock>
+            <TextBlock x:Name="lblCurrentIteration" Text="Repetitia 3 din 4"></TextBlock>
+        </StackPanel>
+        <StackPanel Orientation="Vertical" >
+           
+            <TextBlock x:Name="lblNumeNovena"  TextWrapping="Wrap" Text="Nume novena" VerticalAlignment="Top"/>
+            <TextBox x:Name="txtNume" TextWrapping="Wrap" Text="{x:Bind nov.Name}" VerticalAlignment="Top" Margin="0,0,0,0" Height="19"/>
+
+            <TextBlock x:Name="textBlock" TextWrapping="Wrap" Text="Durata in zile" VerticalAlignment="Top"/>
+            <ComboBox x:Name="cbDuration"  VerticalAlignment="Stretch" Width="40"/>
+            <TextBlock x:Name="lblStartAt" TextWrapping="Wrap" Text="Incepe de la ziua" VerticalAlignment="Top"/>
+                <ComboBox x:Name="cbStartAt"  VerticalAlignment="Stretch" Width="40" />
+
+            <CheckBox x:Name="chkRepeat" Content="Repetare dupa terminare" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="0,20,0,0"/>
+
+            <StackPanel  Margin="25,5,0,0" Visibility="{Binding IsChecked ,ElementName=chkRepeat,Converter={StaticResource Bool2Vis}}">
+                    <StackPanel Orientation="Horizontal">
+                    <RadioButton x:Name="rbNtimes" Content="De " VerticalAlignment="Center" Margin="0"  Width="55" MinWidth="0" GroupName="RepetitionType"/>
+                    <ComboBox x:Name="cbRepeatNTimes" HorizontalAlignment="Stretch"  VerticalAlignment="Center" Width="48" />
+                    <TextBlock Text="ori"  VerticalAlignment="Center" Width="20" Margin="6,0,0,0"/>
+                </StackPanel>
+                    <RadioButton x:Name="rbInfiniteLoop" Content="Repetare continua" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="0" GroupName="RepetitionType" />
+            </StackPanel>
+
+                <CheckBox x:Name="chkAlarma" Content="Alarma zilnica" Width="250" Margin="0,20,0,0" IsChecked="{x:Bind nov.Alarm, Converter={StaticResource NullBool2Bool}, FallbackValue=false}"/>
+                <StackPanel  Visibility="{Binding IsChecked ,ElementName=chkAlarma,Converter={StaticResource Bool2Vis}}" Orientation="vertical" Margin="25,5,0,0">
+                <TextBlock Text="La ora" Margin="0,0,40,0"/>
+                  <!--  <TimePicker x:Name="tpAlarmTime" HorizontalAlignment="Stretch" VerticalAlignment="Top" Margin="0,0,40,0"  ClockIdentifier="24HourClock" Time="{x:Bind nov.AlarmTime, Converter={StaticResource DateTime2TimeSpan}, Mode=OneWay}"/>-->
+            </StackPanel>
+                <CheckBox  x:Name="chkDelayedStart" Content="Incepe la o data ulterioara" Margin="0,20,0,0" />
+                <StackPanel x:Name="stackDelayedStart" Margin="25,5,0,0" Orientation="Vertical"  Visibility="{Binding IsChecked ,ElementName=chkDelayedStart,Converter={StaticResource Bool2Vis}}">
+                <TextBlock Text="Data" Margin="0"/>
+               <!--     <DatePicker x:Name="dpScheduledDate" Width="249" Margin="0" Date="{x:Bind nov.StartDate, Converter={StaticResource DateTime2TimeSpan},Mode=OneWay}" /> -->
+            </StackPanel>
+        </StackPanel>
+        </StackPanel>
+    </Grid>
+</Page>
