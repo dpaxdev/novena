@@ -109,10 +109,8 @@ namespace Novena_Reminder
 
         private  void ButtonSave_Click(object sender, RoutedEventArgs e)
         {
-            nov = collectNovenaData();
-            var task = new Task<bool>(() => SaveNovena());
-            task.RunSynchronously();
-
+            
+            SaveNovena();          
            
             // Page above us will be our master view.
             // Make sure we are using the "drill out" animation in this transition.
@@ -122,35 +120,10 @@ namespace Novena_Reminder
 
         }
 
-        private bool SaveNovena()
+        private void SaveNovena()
         {
-            var novs = Storage.GetCollection();
-
-           
-
-            if (novs != null && novs.Count > 0)
-            {
-                var iterator = novs.GetEnumerator();
-
-                iterator.MoveNext();
-                Novena current;
-                while ((current = iterator.Current) != null)
-                {
-
-                    if (current.ID == nov.ID)
-                    {
-                        break;
-                    }
-                    iterator.MoveNext();
-                }
-
-                if (current != null)
-                {
-                    novs.Remove(current);
-                }
-            }
-            novs.Insert(0, nov);
-            return  Storage.SaveCollection(novs);
+            nov = collectNovenaData();
+            Storage.SaveNovena(nov);    
         }
 
         private Novena collectNovenaData()

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Runtime.Serialization.Json;
+using System.Text;
 using System.Threading.Tasks;
 using Windows.Storage;
 
@@ -11,100 +12,122 @@ namespace Novena_Reminder.Model
     static class Storage
     {
 
+        static string NOV_SETTINGS_PREFIX = "nov";
+        static ApplicationDataContainer localSettings = ApplicationData.Current.RoamingSettings;
+        static Encoding Enc = Encoding.Unicode;
 
-        static StorageFolder folder = ApplicationData.Current.LocalFolder;
-        static string DataFileName = "Data.txt";
 
         public static ObservableCollection<Novena> GetCollection()
         {
-            ObservableCollection<Novena> temp = new ObservableCollection<Novena>();
+            ObservableCollection<Novena> ret = new ObservableCollection<Novena>();
 
-            StorageFile file = GetFile(folder, DataFileName);
-            if (file != null)
-            {             
-                using (Stream stream = Task.Run(() => file.OpenStreamForReadAsync()).Result)
-                {
-                    if (stream.Length == 0) return temp;
-                    DataContractJsonSerializer json = new DataContractJsonSerializer(typeof(ObservableCollection<Novena>));
-                    temp = (ObservableCollection<Novena>)json.ReadObject(stream);
-                }
-            }
+            List<string> SerializedNovenas = ReadSerializedNovenas();
+            foreach (string Serialized in SerializedNovenas)
+                ret.Add(UnserializeNovena(Serialized));
+            return ret;
 
-            return temp;
         }
 
-        private static async Task<StorageFile> GetFileAsyncWrapper(StorageFolder folder, string DataFileName)
+        public static void SaveCollection(ObservableCollection<Novena> novenas)
         {
 
-            StorageFile result;
-
-            var exists = await folder.TryGetItemAsync(DataFileName);
-            if (exists != null)
-            {
-                result = await folder.GetFileAsync(DataFileName);
-            }
-            else
-            {
-                result = null;
-            }
-            return result;
+            foreach (Novena novena in novenas)
+                SaveNovena(novena);
         }
 
-        public static StorageFile GetFile(StorageFolder folder, string DataFileName)
+        public static void SaveNovena(Novena nov)
         {
-
-            var result = Task.Run(() => GetFileAsyncWrapper(folder, DataFileName)).Result;
-            return result;
-
+            WriteNovena(nov);
         }
+
 
         public static Novena GetNovenaById(Guid id)
         {
-            var Novenas = GetCollection();
-            if (Novenas != null && Novenas.Count > 0)
+            String nov = ReadSerializedNovenaById(id);
+            return UnserializeNovena(nov);
+        }
+
+        public static void DeleteNovena(Guid guid)
+        {
+            DeleteSetting(NOV_SETTINGS_PREFIX + guid.ToString());
+        }
+
+        private static Novena UnserializeNovena(string nov)
+        {
+            if (nov == null || nov.Length == 0)
+                return null;
+            Stream stream = String2Stream(nov);
+            DataContractJsonSerializer json = new DataContractJsonSerializer(typeof(Novena));
+            return (Novena)json.ReadObject(stream);
+        }
+
+
+
+        private static void WriteNovena(Novena nov)
+        {
+            var Serialized = SerializeNovena(nov);
+            WriteSetting(NOV_SETTINGS_PREFIX + nov.ID, Serialized);
+        }
+
+        private static string SerializeNovena(Novena nov)
+        {
+            Stream stream = new MemoryStream();
+            DataContractJsonSerializer json = new DataContractJsonSerializer(nov.GetType());
+            json.WriteObject(stream, nov);
+            return Stream2String(stream);
+        }
+
+        private static string ReadSerializedNovenaById(Guid id)
+        {
+            return ReadSetting(NOV_SETTINGS_PREFIX + id);
+        }
+
+        private static List<string> ReadSerializedNovenas()
+        {
+
+            List<string> SerializedNovenas = new List<string>();
+
+            foreach (string key in localSettings.Values.Keys)
             {
-                foreach (Novena nov in Novenas)
+                if (key.StartsWith(NOV_SETTINGS_PREFIX))
                 {
-                    if (nov.ID == id)
-                    {
-                        return nov;
-                    }
+                    SerializedNovenas.Add(localSettings.Values[key] as string);
                 }
             }
-            return null;
+
+            return SerializedNovenas;
         }
 
-        public static bool SaveCollection(ObservableCollection<Novena> Novenas)
+
+        public static void WriteSetting(string key, string value)
         {
-            StorageFile file = CreateFile(folder, DataFileName);
+            localSettings.Values[key] = value;
+        }
+        public static string ReadSetting(string v)
+        {
+            return localSettings.Values[v] as string;
+        }
 
-            if (Novenas.Count == 0) return false;
-
-            using (Stream stream = file.OpenStreamForWriteAsync().Result)
+        public static void DeleteSetting(string v)
+        {
+            if (localSettings.Values.ContainsKey(v))
             {
-                try
-                {
-                    DataContractJsonSerializer json = new DataContractJsonSerializer(Novenas.GetType());
-                    json.WriteObject(stream, Novenas);
-                }
-                catch
-                {
-                    return false;
-                }
+                localSettings.Values.Remove(v);
             }
-            return true;
         }
 
-        private static StorageFile CreateFile(StorageFolder folder, string dataFileName)
+
+        public static Stream String2Stream(string str)
         {
-            return CreateFileAsyncWrapper(folder, dataFileName).Result;
+            return new MemoryStream(Enc.GetBytes(str ?? ""));
         }
 
-        private static async Task<StorageFile> CreateFileAsyncWrapper(StorageFolder folder, string dataFileName)
+        public static string Stream2String(Stream stream)
         {
-            return await folder.CreateFileAsync(DataFileName, CreationCollisionOption.ReplaceExisting);
+            stream.Seek(0, SeekOrigin.Begin);
+            StreamReader reader = new StreamReader(stream);
+            return reader.ReadToEnd();
         }
-
 
     }
 }
