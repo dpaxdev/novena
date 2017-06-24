@@ -15,10 +15,10 @@
             <AppBarButton  Label="Adauga Novena" Click="AddNovenaButton_Click">
                 <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE710;" FontSize="15" Margin="1,3,0,0"  />
             </AppBarButton>
-            <AppBarButton  Label="Mod Selectie" Click="MultipleSelectionButton_Click">
+            <AppBarButton x:Name="abMultiselect"   Label="Mod Selectie" Click="MultipleSelectionButton_Click">
                 <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE762;" FontSize="15" Margin="1,3,0,0"  />
             </AppBarButton>
-            <AppBarButton Icon="Delete" Label="Sterge Selectie" Click="RemoveNovenaButton_Click">
+            <AppBarButton  x:Name="abDeleteSelection"   Icon="Delete" Label="Sterge Selectie" Click="RemoveSelectedNovenaButton_Click" Visibility="Collapsed">
                 <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE762;" FontSize="15" Margin="1,3,0,0"  />
             </AppBarButton>
         </CommandBar>
@@ -26,21 +26,28 @@
 
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
         <ListView x:Name="LV" 
-                               
-                  DataContext="MainPage"                  
+                  
+                  DataContext="Novenas" 
+                  
                   IsItemClickEnabled="True"
-                  ItemClick="OnItemClick"  
+                  ItemClick="OnItemClick"     
                   Background="Transparent"                     
                   >
             <ListView.ItemTemplate>
                 <DataTemplate>
-                    <Grid Height="34" VerticalAlignment="Top">
+                    <Grid Height="34" VerticalAlignment="Top" Holding="Item_Holding" RightTapped="Item_RightClick">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition x:Name="CounterColumn" Width="80"  />
                             <ColumnDefinition x:Name="MasterColumn"  />
                             <ColumnDefinition Width="53"/>
                             <ColumnDefinition x:Name="ActiveColumn" Width="60" />
                         </Grid.ColumnDefinitions>
+
+                        <FlyoutBase.AttachedFlyout>
+                            <MenuFlyout>                               
+                                <MenuFlyoutItem x:Name="DeleteButton" Text="Delete" Click="DeleteSingleNovena_click"/>                               
+                            </MenuFlyout>
+                        </FlyoutBase.AttachedFlyout>
                         <TextBlock x:Name="txtProgress" Grid.Column="1" HorizontalAlignment="Left" TextWrapping="Wrap" Text="{Binding Progress}" VerticalAlignment="Center" Width="234"  Height="32" Margin="0,1"/>
 
                         <TextBlock x:Name="txtNovennaName" Grid.Column="1" HorizontalAlignment="Left" TextWrapping="Wrap" Text="{Binding Name}" VerticalAlignment="Center" Width="234"  Height="32" Margin="0,1"/>
@@ -48,7 +55,7 @@
                             <TextBlock x:Name="symbolRecurrence" HorizontalAlignment="Left" Text="&#xE1CA;" VerticalAlignment="Center" Padding="3" Width="21" FontFamily="Segoe MDL2 Assets" MinWidth="0" MinHeight="0" Margin="2,4,2,0" Height="21" />
                             <TextBlock x:Name="symbolScheduled" HorizontalAlignment="Left" Text="&#xE787;" VerticalAlignment="Center" Padding="3" Width="21" FontFamily="Segoe MDL2 Assets" MinWidth="0" MinHeight="0" Margin="2,4,2,0" Height="21" />
                         </StackPanel>
-                        <ToggleSwitch x:Name="toggleSwitch"   Grid.Column="3" Header="" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" OffContent="" OnContent="" MinWidth="46" RenderTransformOrigin="0.59,0.697" ScrollViewer.VerticalScrollBarVisibility="Disabled" Margin="7,0"/>
+                        <ToggleSwitch x:Name="tgEnabledToggle"  Loaded="tgEnabledToggle_Loaded" IsOn="{Binding IsActive, Mode=TwoWay}"  Grid.Column="3" Header="" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" OffContent="" OnContent="" MinWidth="46" RenderTransformOrigin="0.59,0.697" ScrollViewer.VerticalScrollBarVisibility="Disabled" Margin="7,0" />
                     </Grid>
                 </DataTemplate>
                 

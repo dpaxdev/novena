@@ -14,7 +14,7 @@ namespace Novena_Reminder.Model
 
         static string NOV_SETTINGS_PREFIX = "nov";
         static ApplicationDataContainer localSettings = ApplicationData.Current.RoamingSettings;
-        static Encoding Enc = Encoding.Unicode;
+        static Encoding Enc = Encoding.UTF8;
 
 
         public static ObservableCollection<Novena> GetCollection()
@@ -41,15 +41,15 @@ namespace Novena_Reminder.Model
         }
 
 
-        public static Novena GetNovenaById(Guid id)
+        public static Novena GetNovenaById(string id)
         {
             String nov = ReadSerializedNovenaById(id);
             return UnserializeNovena(nov);
         }
 
-        public static void DeleteNovena(Guid guid)
+        public static void DeleteNovena(string id)
         {
-            DeleteSetting(NOV_SETTINGS_PREFIX + guid.ToString());
+            DeleteSetting(NOV_SETTINGS_PREFIX + id.ToString());
         }
 
         private static Novena UnserializeNovena(string nov)
@@ -65,6 +65,10 @@ namespace Novena_Reminder.Model
 
         private static void WriteNovena(Novena nov)
         {
+            if (!nov.IsActive)
+            {
+                nov.StartDate = DateTime.MinValue.ToUniversalTime();
+            }
             var Serialized = SerializeNovena(nov);
             WriteSetting(NOV_SETTINGS_PREFIX + nov.ID, Serialized);
         }
@@ -77,7 +81,7 @@ namespace Novena_Reminder.Model
             return Stream2String(stream);
         }
 
-        private static string ReadSerializedNovenaById(Guid id)
+        private static string ReadSerializedNovenaById(string id)
         {
             return ReadSetting(NOV_SETTINGS_PREFIX + id);
         }
@@ -91,6 +95,7 @@ namespace Novena_Reminder.Model
             {
                 if (key.StartsWith(NOV_SETTINGS_PREFIX))
                 {
+                   // localSettings.Values.Remove(key);
                     SerializedNovenas.Add(localSettings.Values[key] as string);
                 }
             }

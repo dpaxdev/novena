@@ -31,25 +31,42 @@ namespace Novena_Reminder
             // Realize the main page content.
             // FindName("RootPanel");
 
-            cbDuration.Loaded += CbDuration_Loaded;
-            cbRepeatNTimes.Loaded += CbRepeatNTimes_Loaded; 
+            cbDuration.TextChanged += CbDuration_TextChanged;
+            cbStartAt.Loaded += CbStartAt_Loaded;
         }
 
-        private void CbRepeatNTimes_Loaded(object sender, RoutedEventArgs e)
+        private void CbStartAt_Loaded(object sender, RoutedEventArgs e)
         {
-            Helper.PopulateComboboxWithIntInterval(cbRepeatNTimes, 1, 30, 1);
+            PopuplateCBStartAt();
         }
 
-        private void CbDuration_Loaded(object sender, RoutedEventArgs e)
+
+
+        private void ComboboxSetSelectedValue(ComboBox comboBox, object value)
         {
-            Helper.PopulateComboboxWithIntInterval(cbDuration, 1, 30, 1);
-            cbDuration.SelectionChanged += CbDuration_SelectionChanged;
+            var selected = new ComboBoxItem();
+            selected.Content = value;
+            comboBox.SelectedItem = value;
         }
 
-        private  void CbDuration_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void CbDuration_TextChanged(object sender, TextChangedEventArgs e)
         {
-            var cb = sender as ComboBox;
-            Helper.PopulateComboboxWithIntInterval(cbStartAt, 1,  Helper.Combobox2Int(cb),1 );
+            PopuplateCBStartAt();
+        }
+
+
+
+        private void PopuplateCBStartAt()
+        {
+            Helper.PopulateComboboxWithIntInterval(cbStartAt, 1, ParseValueToInt(cbDuration.Text), 1);
+            ComboboxSetSelectedValue(cbStartAt, nov.StartAt);
+        }
+
+        private int ParseValueToInt(string text)
+        {
+            int parsed = 0;
+            int.TryParse(text, out parsed);
+            return parsed;
         }
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
@@ -87,58 +104,89 @@ namespace Novena_Reminder
         {
             // Mark event as handled so we don't get bounced out of the app.
             e.Handled = true;
-            // Page above us will be our master view.
-            // Make sure we are using the "drill out" animation in this transition.
-            Frame.Navigate(typeof(MainPage), "Back", new EntranceNavigationTransitionInfo());
+            NavigateToMainPage();
         }
 
-      
 
-        private void ButtonDelete_Click(object sender, RoutedEventArgs e)
+
+        private async void ButtonDelete_Click(object sender, RoutedEventArgs e)
+        {
+            bool DialogResult = await  ShowNovenaDeleteDialog();
+            if (DialogResult)
+            {
+                Storage.DeleteNovena(nov.ID);
+                NavigateToMainPage();
+            }
+        }
+
+        private async Task<bool> ShowNovenaDeleteDialog()
         {
 
+            ContentDialog deleteDialog = new ContentDialog
+            {
+                Title = "Stergere novena",
+                Content = "Sigur doriti sa stergeti aceasta novena?",
+                PrimaryButtonText = "Sterge",
+                SecondaryButtonText = "Nu"
+            };
+           
+            if (nov.Ongoing)
+                deleteDialog.Content = "Aceasta novena este in desfasurare.\n" + deleteDialog.Content; 
+            ContentDialogResult result = await deleteDialog.ShowAsync();
+
+            // Delete the novena if the user clicked the primary button.
+           
+            if (result == ContentDialogResult.Primary)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+
         }
+
+
 
         private void ButtonCancel_Click(object sender, RoutedEventArgs e)
         {
-            // Page above us will be our master view.
-            // Make sure we are using the "drill out" animation in this transition.
-            Frame.Navigate(typeof(MainPage), "Back", new EntranceNavigationTransitionInfo());
+            NavigateToMainPage();
         }
 
 
-        private  void ButtonSave_Click(object sender, RoutedEventArgs e)
+        private void ButtonSave_Click(object sender, RoutedEventArgs e)
+        {
+
+            SaveNovena();
+            NavigateToMainPage();
+
+        }
+
+        private void NavigateToMainPage()
+            
         {
             
-            SaveNovena();          
-           
-            // Page above us will be our master view.
-            // Make sure we are using the "drill out" animation in this transition.
-          
-          Frame.Navigate(typeof(MainPage), null, new EntranceNavigationTransitionInfo());
-  
-
+            Frame.Navigate(typeof(MainPage), "Back", new EntranceNavigationTransitionInfo());
         }
 
         private void SaveNovena()
         {
             nov = collectNovenaData();
-            Storage.SaveNovena(nov);    
+            Storage.SaveNovena(nov);
         }
 
         private Novena collectNovenaData()
         {
-            var task = new Task<Novena>(() => Storage.GetNovenaById(nov.ID));
-            task.RunSynchronously();
-            var novena = task.Result;
+
+            var novena = Storage.GetNovenaById(nov.ID);
             if (novena == null)
                 novena = nov;
 
             novena.Alarm = chkAlarma.IsChecked.Value == true ? true : false;
-          //  novena.AlarmTime = new DateTime(tpAlarmTime.Time.Ticks);
-            int duration;
-            int.TryParse(cbDuration.SelectedValue.ToString(), out duration);
-            novena.Duration = duration;
+            novena.AlarmTime = new DateTime(tpAlarmTime.Time.Ticks);
+
+            novena.Duration = ParseValueToInt(cbDuration.Text);
             novena.IsActive = togIsActive.IsOn;
             novena.Name = txtNume.Text;
             //get recurrence type and repetitions no.
@@ -147,28 +195,31 @@ namespace Novena_Reminder
                 if (rbInfiniteLoop.IsChecked == true)
                 {
                     novena.Recurrence = Novena.RecurrencePattern.Loop;
-                    novena.Repetitions = 0;
+                    novena.Reps = 0;
                 }
                 if (rbNtimes.IsChecked == true)
                 {
-                    int reps;
-                    int.TryParse(cbRepeatNTimes.SelectedValue.ToString(), out reps);
-                    novena.Repetitions = reps;
+
+                    novena.Reps = ParseValueToInt(cbRepeatNTimes.Text);
                     novena.Recurrence = Novena.RecurrencePattern.RepeatNTimes;
                 }
             }
             else
             {
                 novena.Recurrence = Novena.RecurrencePattern.RunOnce;
-                novena.Repetitions = 0;
+                novena.Reps = 0;
             }
 
-            novena.ScheduledStart = chkDelayedStart.IsChecked == true;
-        //    novena.ScheduledStartDate = new DateTime(dpScheduledDate.Date.Ticks);
+            novena.SchedStart = chkDelayedStart.IsChecked == true;
+            novena.SchedStartDate = new DateTime(dpScheduledDate.Date.Ticks);
 
-            novena.StartAt =  Helper.Combobox2Int(cbStartAt);
+            novena.StartAt = Helper.Combobox2Int(cbStartAt);
             return novena;
 
         }
+
+
+
+
     }
 }

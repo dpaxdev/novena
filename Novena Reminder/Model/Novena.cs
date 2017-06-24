@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Novena_Reminder.Controller;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,43 +11,48 @@ namespace Novena_Reminder
     {
         public enum RecurrencePattern
         {
-            Loop,
             RunOnce,
+            Loop,
             RepeatNTimes
         }
 
         public Novena()
         {
-            ID = Guid.NewGuid();
+            ID = GenerateId();
             InitializeDateTimeFields();
+        }
+
+        private string GenerateId()
+        {
+            return Helper.EncodeId(DateTime.Now.ToUniversalTime().Ticks);
         }
 
         private void InitializeDateTimeFields()
         {
             StartDate =  DateTime.MinValue.ToUniversalTime();
-            ScheduledStartDate = DateTime.MinValue.ToUniversalTime();
+            SchedStartDate = DateTime.MinValue.ToUniversalTime();
             AlarmTime = DateTime.MinValue.ToUniversalTime();
         }
 
-        public Novena(Guid id)
+        public Novena(string id)
         {
             ID = id;
             InitializeDateTimeFields();
         }
 
-        public Guid ID { get;  set; }
+        public string ID { get;  set; }
 
         public string Name { get; set; }       
 
-        public int Repetitions { get; set; }
+        public int Reps { get; set; }
 
-        public int StartAt { get; set; }
+        public int StartAt { get; set; } 
 
         public DateTime StartDate { get; set; }
 
-        public bool ScheduledStart { get; set; }
+        public bool SchedStart { get; set; }
 
-        public DateTime ScheduledStartDate { get; set; }
+        public DateTime SchedStartDate { get; set; }
 
         public int Duration { get; set; }        
 
@@ -60,88 +66,107 @@ namespace Novena_Reminder
 
         public bool IsActive { get; set; }
 
-        public void UpdateProgress()
+        public bool RecurrenceIsOn { get { return Recurrence != RecurrencePattern.RunOnce; } }
+                
+
+        public bool Ongoing
         {
-            throw new System.NotImplementedException();
-        }
+            get
+            {
+                if (!IsActive) return false;
 
-        private bool CheckOngoing()
+                if (StartDate == DateTime.MinValue) //i.e. not set           
+                {
+                    if (SchedStartDate <= DateTime.Now.Date)
+                        StartDate = SchedStartDate;
+                    else return false; //the Novenna hasn't started yet or something's wrong
+                }
+                var days = DaysCompleted;
+
+                if (days < 0) return false; //not started yet
+                var repetitions = days / Duration;
+
+                switch (Recurrence)
+                {
+                    case RecurrencePattern.Loop:
+
+                        break;
+                    case RecurrencePattern.RepeatNTimes:
+                        if (repetitions >= Reps)
+                        {
+                            Deactivate();
+                            return false; //just expired;
+                        }
+                        break;
+                    case RecurrencePattern.RunOnce:
+                        if (repetitions <= 1)
+                        {
+                            Deactivate();
+                            return false; //just expired
+                        }
+                        break;
+                }
+                return true;
+            }
+        }
+        public int CurrentIteration
         {
-
-            if (StartDate == DateTime.MinValue) //i.e. not set           
+            get
             {
-                if (ScheduledStartDate <= DateTime.Now.Date)
-                    StartDate = ScheduledStartDate;
-                else return false; //the Novenna hasn't started yet or something's wrong
+                if (!Ongoing ) return -1;
+                //we should never encounter this but we should check nontheless, else we might divide with 0 and the world would break;
+                if (Duration == 0) return -1;
+
+                var result = DaysCompleted  / Duration;
+                return result;
+
             }
-            var days = GetDaysCompleted();
-
-            if (days < 0) return false; //not started yet
-            var repetitions = days / Duration;
-
-            switch (Recurrence)
-            {
-                case RecurrencePattern.Loop:
-
-                    break;
-                case RecurrencePattern.RepeatNTimes:
-                    if (repetitions >= Repetitions)
-                    {
-                        Deactivate();
-                        return false; //just expired;
-                    }
-                    break;
-                case RecurrencePattern.RunOnce:
-                    if (repetitions <= 1)
-                    {
-                        Deactivate();
-                        return false; //just expired
-                    }
-                    break;
-            }
-            return true;
         }
-        private int GetDaysCompleted() {
-
-            //we should never encounter this but we should check nontheless, else we might divide with 0 and the world would break;
-            if (Duration == 0) return -1;
-
-            if (StartDate == DateTime.MinValue) //i.e. not set           
+        public int DaysCompleted {
+            get
             {
-                if (ScheduledStartDate == DateTime.Now.Date)
-                    StartDate = DateTime.Now.Date;
-                else return -1; //no progress to report for a Novenna that hasn't started yet                
+
+                //we should never encounter this but we should check nontheless, else we might divide with 0 and the world would break;
+                if (Duration == 0) return -1;
+
+                if (StartDate == DateTime.MinValue) //i.e. not set           
+                {
+                    if (SchedStartDate == DateTime.Now.Date)
+                        StartDate = DateTime.Now.Date;
+                    else return -1; //no progress to report for a Novenna that hasn't started yet                
+                }
+                return (DateTime.Now.Date - StartDate.Date).Days + StartAt;
             }
-            return (DateTime.Now.Date - StartDate.Date).Days + StartAt; 
         }
-        private int GetCurentProgress()
+        public int CurentProgress //returns the current day of the novena if novena is active and has already started
         {
-            int progress = -1;
-            //we should never actually encounter this as we only call this method for active items:
-            if (!IsActive)
-                return -1;
-            //we should never encounter this but we should check nontheless, else we might divide with 0 and the world would break;
-            if (Duration == 0) return -1;
-            if (!CheckOngoing()) return -1;
+            get
+            {
+                int progress = -1;
+                 if (!IsActive)
+                    return -1;
+                //we should never encounter this but we should check nontheless, else we might divide with 0 and the world would break;
+                if (Duration == 0) return -1;
+                if (Ongoing) return -1; //not started yet
 
-            var days = GetDaysCompleted();
+               if (DaysCompleted < 0) return -1; //not started yet maybe                
 
-            var repetitions = days / Duration;
-          
-            progress = days % Duration;
+                progress = DaysCompleted % Duration;
 
-            return progress;
+                return progress;
+            }
         }
 
-        private void Deactivate()
+        public void Deactivate()
         {
             //to-do: do various house-cleaning actions before deactivating maybe.
             IsActive = false;
         }
-        private bool Activate()
+        public bool Activate()
         {
             //to do: if scheduled reset start date.
             //to-do: check if activation makes sense (if scheduled in the past for example);
+
             IsActive = true;
             return true;
         }
