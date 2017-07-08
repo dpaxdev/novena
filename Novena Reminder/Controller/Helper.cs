@@ -1,6 +1,8 @@
-﻿using System;
+﻿using Microsoft.Toolkit.Uwp.Notifications;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Windows.UI.Notifications;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Data;
@@ -9,6 +11,122 @@ namespace Novena_Reminder.Controller
 {
     public static class Helper
     {
+        public static ToastNotifier tn;
+
+        public static void ManageAlarms(Novena nov)
+        {
+            if (tn == null)
+                tn = ToastNotificationManager.CreateToastNotifier();
+
+
+            var Notifications = tn.GetScheduledToastNotifications();
+            //Step 1: delete all notifications for this Novena if any
+            foreach (ScheduledToastNotification notif in Notifications)
+            {
+                if (notif.Group == nov.ID)
+                    tn.RemoveFromSchedule(notif);
+            }
+            //Step 2: decide if we need to add the notifications back;
+            if (nov.IsActive && nov.Alarm && (nov.IsOngoing || nov.SchedStart))
+            {
+
+                DateTime CurrentDate = new DateTime(
+                                       DateTime.Now.Year,
+                                       DateTime.Now.Month,
+                                       DateTime.Now.Day,
+                                       nov.AlarmTime.Hour,
+                                       nov.AlarmTime.Minute,
+                                       0
+                                   );
+
+                //We schedule alarms for the whole next run of the Novena
+                for (int x = nov.CurrentProgress; x < nov.Duration; x++)
+                {
+
+                    DateTime AlarmTime;
+
+                    if (nov.IsOngoing)
+                    {
+                        AlarmTime = CurrentDate.AddDays(x - nov.CurrentProgress);
+                    }
+                    else
+                    {
+                        //so we have a scheduled start in the future
+                        //determine the first day
+                        var ScheduledAlarmDate = new DateTime(nov.SchedStartDate.Year, nov.SchedStartDate.Month, nov.SchedStartDate.Day, CurrentDate.Hour, CurrentDate.Minute, 0);
+                        var Delay = ScheduledAlarmDate.Subtract(CurrentDate);
+                        AlarmTime = CurrentDate.AddDays((x - nov.CurrentProgress) + Delay.Days);
+                    }
+                    AddScheduledToastNotification(nov.ID, nov.Name, "Ziua " + nov.CurrentProgress.ToString(), AlarmTime);
+                }
+            }
+        }
+
+        private static void AddScheduledToastNotification(string group, string title, string contentText, DateTime time)
+        {
+
+            ToastContent content = new ToastContent()
+            {
+                Duration = ToastDuration.Long,
+                
+
+                Visual = new ToastVisual()
+                {
+
+                    AddImageQuery = false,
+                    BindingGeneric = new ToastBindingGeneric()
+                    {
+                        Children =
+                        {
+                            new AdaptiveText()
+                            {
+                                Text = title,
+                                HintMaxLines = 1
+                            },
+
+                            new AdaptiveText()
+                            {
+                                Text = contentText
+                            }
+                        }
+                    }
+                },
+                Scenario = ToastScenario.Reminder,
+                Audio = new ToastAudio()
+                {
+                    Src = new Uri("ms-winsoundevent:Notification.Looping.Alarm"),
+                    Loop = true,
+                    Silent = false
+                },
+                Actions = new ToastActionsCustom()
+                {
+                    Buttons =
+                    {
+                       new ToastButtonSnooze(),
+                       new ToastButtonDismiss()
+                    }
+                }
+            };
+
+            var xml = content.GetXml();
+
+            var scheduledToast = new ScheduledToastNotification(xml, new DateTimeOffset(time))
+            {
+                Group = group
+            };
+            tn.AddToSchedule(scheduledToast);
+        }
+
+        public static void ShowDialog(string title, string content)
+        {
+            ContentDialog WarningDialog = new ContentDialog
+            {
+                Title = title,
+                Content = content,
+                PrimaryButtonText = "OK"
+            };
+            WarningDialog.ShowAsync().GetResults();
+        }
         public static int Combobox2Int(ComboBox cb)
         {
             int ret = 0;
@@ -34,8 +152,6 @@ namespace Novena_Reminder.Controller
 
         public static long DecodeId(string s)
         {
-
-
             byte[] data2 = new byte[8];
             // add back in all the characters removed during encoding
             Convert.FromBase64String("AAAAA" + s + "=").CopyTo(data2, 0);
@@ -47,7 +163,6 @@ namespace Novena_Reminder.Controller
             long decoded = BitConverter.ToInt64(data2, 0);
 
             return decoded;
-
         }
 
         public static string EncodeId(long id)
@@ -87,8 +202,31 @@ namespace Novena_Reminder.Controller
         {
             throw new NotImplementedException();
         }
-
     }
+
+    public class InverseBooleanToVisibilityConverter : IValueConverter
+    {
+        private object GetVisibility(object value)
+        {
+            if (!(value is bool))
+                return Visibility.Collapsed;
+            bool objValue = (bool)value;
+            if (!objValue)
+            {
+                return Visibility.Visible;
+            }
+            return Visibility.Collapsed;
+        }
+        public object Convert(object value, Type targetType, object parameter, string language)
+        {
+            return GetVisibility(value);
+        }
+        public object ConvertBack(object value, Type targetType, object parameter, string language)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
 
     public class DateTimeToDateTimeOffsetConverter : IValueConverter
     {
@@ -100,7 +238,7 @@ namespace Novena_Reminder.Controller
                 DateTime date = (DateTime)value;
                 return new DateTimeOffset(date);
             }
-            catch 
+            catch
             {
                 return DateTimeOffset.MinValue;
             }
@@ -113,7 +251,7 @@ namespace Novena_Reminder.Controller
                 DateTimeOffset dto = (DateTimeOffset)value;
                 return dto.DateTime;
             }
-            catch 
+            catch
             {
                 return DateTime.MinValue;
             }
@@ -169,7 +307,7 @@ namespace Novena_Reminder.Controller
     {
         public object Convert(object value, Type targetType, object parameter, string language)
         {
-            if ((value is bool && (bool)value == true) || (value is bool? && (bool?)value==true ))
+            if ((value is bool && (bool)value == true) || (value is bool? && (bool?)value == true))
             {
                 return false;
             }
@@ -211,7 +349,7 @@ namespace Novena_Reminder.Controller
             catch
             {
                 return false;
-            }           
+            }
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, string language)

@@ -2,11 +2,22 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:Novena_Reminder"
+    xmlns:controller="using:Novena_Reminder.Controller"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:View="using:Novena_Reminder.View"
     x:Class="Novena_Reminder.MainPage"
     mc:Ignorable="d">
+    <Page.Resources>
+        <controller:BooleanToVisibilityConverter x:Key="Bool2Vis"  />
+        <controller:InverseBooleanToVisibilityConverter x:Key="InverseBool2Vis"  />
+        <controller:NullableBooleanToBooleanConverter x:Key="NullBool2Bool" />
+        <controller:DateTimeToTimeSpanConverter x:Key="DateTime2TimeSpan" />
+        <controller:DateTimeToDateTimeOffsetConverter x:Key="DateTime2TimeOffset" />
+        <controller:InvertBooleanConverter x:Key="InvertBoolean" />
+        <controller:RecurrenceToCheckConvert x:Key="Recurrence2Check" />
+        <controller:ComboBoxItemConvert x:Key="ComboBoxItemConvert" />
+    </Page.Resources>
     <Page.BottomAppBar>
         <CommandBar>
             <CommandBar.Content>
@@ -28,39 +39,57 @@
         <ListView x:Name="LV" 
                   
                   DataContext="Novenas" 
-                  
+                 
                   IsItemClickEnabled="True"
                   ItemClick="OnItemClick"     
                   Background="Transparent"                     
                   >
             <ListView.ItemTemplate>
-                <DataTemplate>
+                <DataTemplate  x:DataType="local:Novena">
                     <Grid Height="34" VerticalAlignment="Top" Holding="Item_Holding" RightTapped="Item_RightClick">
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition x:Name="CounterColumn" Width="80"  />
+                            <ColumnDefinition x:Name="CounterColumn" Width="60"  />
                             <ColumnDefinition x:Name="MasterColumn"  />
-                            <ColumnDefinition Width="53"/>
+                            <ColumnDefinition x:Name="StatusColumn" Width="53"/>
                             <ColumnDefinition x:Name="ActiveColumn" Width="60" />
                         </Grid.ColumnDefinitions>
 
                         <FlyoutBase.AttachedFlyout>
-                            <MenuFlyout>                               
-                                <MenuFlyoutItem x:Name="DeleteButton" Text="Delete" Click="DeleteSingleNovena_click"/>                               
+                            <MenuFlyout>
+                                <MenuFlyoutItem x:Name="DeleteButton" Text="Delete" Click="DeleteSingleNovena_click"/>
                             </MenuFlyout>
                         </FlyoutBase.AttachedFlyout>
-                        <TextBlock x:Name="txtProgress" Grid.Column="1" HorizontalAlignment="Left" TextWrapping="Wrap" Text="{Binding Progress}" VerticalAlignment="Center" Width="234"  Height="32" Margin="0,1"/>
+                        <TextBlock x:Name="txtProgress" Text="Ziua "  Grid.Column="0" HorizontalAlignment="Left" TextWrapping="Wrap" 
+                                   VerticalAlignment="Center"  Height="32" Margin="0,1"
+                                   Visibility="{x:Bind IsOngoing, Converter={StaticResource Bool2Vis}}">
+                            <Run Text="{x:Bind CurrentProgress}"/>
+                        </TextBlock>
+                        <TextBlock Text="-" Visibility="{x:Bind IsOngoing, Converter={StaticResource InverseBool2Vis} }" Height="32" Margin="0,1" />
 
-                        <TextBlock x:Name="txtNovennaName" Grid.Column="1" HorizontalAlignment="Left" TextWrapping="Wrap" Text="{Binding Name}" VerticalAlignment="Center" Width="234"  Height="32" Margin="0,1"/>
-                        <StackPanel Grid.Column="2"  Orientation="Horizontal">
-                            <TextBlock x:Name="symbolRecurrence" HorizontalAlignment="Left" Text="&#xE1CA;" VerticalAlignment="Center" Padding="3" Width="21" FontFamily="Segoe MDL2 Assets" MinWidth="0" MinHeight="0" Margin="2,4,2,0" Height="21" />
-                            <TextBlock x:Name="symbolScheduled" HorizontalAlignment="Left" Text="&#xE787;" VerticalAlignment="Center" Padding="3" Width="21" FontFamily="Segoe MDL2 Assets" MinWidth="0" MinHeight="0" Margin="2,4,2,0" Height="21" />
-                        </StackPanel>
-                        <ToggleSwitch x:Name="tgEnabledToggle"  Loaded="tgEnabledToggle_Loaded" IsOn="{Binding IsActive, Mode=TwoWay}"  Grid.Column="3" Header="" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" OffContent="" OnContent="" MinWidth="46" RenderTransformOrigin="0.59,0.697" ScrollViewer.VerticalScrollBarVisibility="Disabled" Margin="7,0" />
+                        <TextBlock x:Name="txtNovennaName" Grid.Column="1" HorizontalAlignment="Left" TextWrapping="Wrap" 
+                                   Text="{Binding Name}" VerticalAlignment="Center" Width="234"  Height="32" Margin="0,1"/>
+                        <Grid Grid.Column="2">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="26"  />
+                                <ColumnDefinition Width="26"  />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock x:Name="symbolRecurrence" HorizontalAlignment="Left" VerticalAlignment="Center" Grid.Column="0"
+                                Text="&#xE1CA;" FontFamily="Segoe MDL2 Assets"
+                                Padding="3" Width="21" Height="21" Margin="2,4,2,0">                                
+                            </TextBlock>
+                            <TextBlock x:Name="symbolScheduled" HorizontalAlignment="Left" VerticalAlignment="Center"  Grid.Column="1"
+                                Text="&#xE787;" FontFamily="Segoe MDL2 Assets"
+                                Padding="3" Width="21" Height="21" Margin="2,4,2,0" >                                
+                            </TextBlock>
+
+                        </Grid>
+
+                        <ToggleSwitch x:Name="tgEnabledToggle"  Loaded="TgEnabledToggle_Loaded" IsOn="{Binding IsActive, Mode=OneWay}"  Grid.Column="3" Header="" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" OffContent="" OnContent="" MinWidth="46" RenderTransformOrigin="0.59,0.697" ScrollViewer.VerticalScrollBarVisibility="Disabled" Margin="7,0" />
                     </Grid>
                 </DataTemplate>
-                
+
             </ListView.ItemTemplate>
         </ListView>
-       
+
     </Grid>
 </Page>

@@ -21,6 +21,7 @@ namespace Novena_Reminder
 
         static CoreDispatcher dispatcher = CoreWindow.GetForCurrentThread().Dispatcher;
         private Novena nov;
+
         public NovenaDetails()
         {
             this.InitializeComponent();
@@ -44,8 +45,10 @@ namespace Novena_Reminder
 
         private void ComboboxSetSelectedValue(ComboBox comboBox, object value)
         {
-            var selected = new ComboBoxItem();
-            selected.Content = value;
+            var selected = new ComboBoxItem()
+            {
+                Content = value
+            };
             comboBox.SelectedItem = value;
         }
 
@@ -64,8 +67,7 @@ namespace Novena_Reminder
 
         private int ParseValueToInt(string text)
         {
-            int parsed = 0;
-            int.TryParse(text, out parsed);
+            int.TryParse(text, out int parsed);
             return parsed;
         }
 
@@ -81,7 +83,7 @@ namespace Novena_Reminder
             {
                 nov = new Novena();
                 lblNovennaDetailsActionType.Text = "Adauga ";
-                nov.Name = "test";
+                nov.Name = "Novena";
 
             }
 
@@ -108,10 +110,9 @@ namespace Novena_Reminder
         }
 
 
-
         private async void ButtonDelete_Click(object sender, RoutedEventArgs e)
         {
-            bool DialogResult = await  ShowNovenaDeleteDialog();
+            bool DialogResult = await ShowNovenaDeleteDialog();
             if (DialogResult)
             {
                 Storage.DeleteNovena(nov.ID);
@@ -129,13 +130,13 @@ namespace Novena_Reminder
                 PrimaryButtonText = "Sterge",
                 SecondaryButtonText = "Nu"
             };
-           
-            if (nov.Ongoing)
-                deleteDialog.Content = "Aceasta novena este in desfasurare.\n" + deleteDialog.Content; 
+
+            if (nov.IsOngoing)
+                deleteDialog.Content = "Aceasta novena este in desfasurare.\n" + deleteDialog.Content;
             ContentDialogResult result = await deleteDialog.ShowAsync();
 
             // Delete the novena if the user clicked the primary button.
-           
+
             if (result == ContentDialogResult.Primary)
             {
                 return true;
@@ -164,25 +165,49 @@ namespace Novena_Reminder
         }
 
         private void NavigateToMainPage()
-            
+
         {
-            
+
             Frame.Navigate(typeof(MainPage), "Back", new EntranceNavigationTransitionInfo());
         }
 
         private void SaveNovena()
         {
-            nov = collectNovenaData();
-            Storage.SaveNovena(nov);
+
+            Novena newNov = null;
+            bool success = false;
+
+            try
+            {
+                newNov = CollectNovenaData();
+                success = true;
+            }
+            catch (InvalidOperationException ex)
+            {
+                Helper.ShowDialog("Novena nu poate fi activata", ex.Message);
+                togIsActive.IsOn = false;
+            }
+            if (success == true)
+            {
+                nov = newNov;
+                Storage.SaveNovena(nov);
+            }
+
+
         }
 
-        private Novena collectNovenaData()
+        private Novena CollectNovenaData()
         {
 
             var novena = Storage.GetNovenaById(nov.ID);
             if (novena == null)
                 novena = nov;
 
+            var active = nov.IsActive;
+            if (active && togIsActive.IsOn == false)
+                novena.Deactivate();
+            if (!active && togIsActive.IsOn == true)
+                novena.Activate();   //will throw InvalidOperationException in certain cases which we need to catch outside of this method
             novena.Alarm = chkAlarma.IsChecked.Value == true ? true : false;
             novena.AlarmTime = new DateTime(tpAlarmTime.Time.Ticks);
 
@@ -218,8 +243,9 @@ namespace Novena_Reminder
 
         }
 
+        private void ChkDelayedStart_Tapped(object sender, Windows.UI.Xaml.Input.TappedRoutedEventArgs e)
+        {
 
-
-
+        }
     }
 }

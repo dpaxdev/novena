@@ -1,7 +1,9 @@
-﻿using System;
+﻿using Novena_Reminder.Controller;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
+using System.Reflection;
 using System.Runtime.Serialization.Json;
 using System.Text;
 using System.Threading.Tasks;
@@ -37,7 +39,9 @@ namespace Novena_Reminder.Model
 
         public static void SaveNovena(Novena nov)
         {
+
             WriteNovena(nov);
+            Helper.ManageAlarms(nov);
         }
 
 
@@ -67,8 +71,21 @@ namespace Novena_Reminder.Model
         {
             if (!nov.IsActive)
             {
-                nov.StartDate = DateTime.MinValue.ToUniversalTime();
+                nov.StartDate = DateTime.MinValue;
             }
+            /*
+            PropertyInfo[] properties = typeof(Novena).GetProperties();
+            foreach (PropertyInfo property in properties)
+            {
+                if (property.GetType() == typeof(DateTime))
+                {
+                    if ((DateTime)property.GetValue(nov) == DateTime.MinValue)
+                    {
+                        property.SetValue(nov, DateTime.MinValue.ToUniversalTime());
+                    }
+                }
+            }
+            */
             var Serialized = SerializeNovena(nov);
             WriteSetting(NOV_SETTINGS_PREFIX + nov.ID, Serialized);
         }

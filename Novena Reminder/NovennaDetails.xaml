@@ -46,7 +46,7 @@
             <ToggleSwitch x:Name="togIsActive" OnContent="Activa" OffContent="Inactiva" HorizontalAlignment="Right" Width="60" Margin="0,-2,10,2" MinWidth="100" IsOn="{x:Bind nov.IsActive, Mode=OneWay}" />
         </Grid>
         <StackPanel Margin="20,50,20,10">
-            <StackPanel x:Name="StatusPanel"  Visibility="{x:Bind nov.Ongoing, Converter={StaticResource Bool2Vis}}"  Orientation="Vertical" BorderBrush="Coral" BorderThickness="1" Margin="5,5,5,20">
+            <StackPanel x:Name="StatusPanel"  Visibility="{x:Bind nov.IsOngoing, Converter={StaticResource Bool2Vis}}"  Orientation="Vertical" BorderBrush="Coral" BorderThickness="1" Margin="5,5,5,20">
                 <TextBlock x:Name="lblStatus" Text="Ziua" >
                     <Run Text="{x:Bind nov.Progress}"/>
                     <Run Text=" din "/>
@@ -65,9 +65,9 @@
                 <TextBox x:Name="txtNume" TextWrapping="Wrap" Text="{x:Bind nov.Name}" VerticalAlignment="Top" Margin="0,0,0,0" Height="19"/>
 
                 <TextBlock x:Name="textBlock" TextWrapping="Wrap" Text="Durata in zile" VerticalAlignment="Top"/>
-                <TextBox x:Name="cbDuration"   IsEnabled="{x:Bind nov.Ongoing, Converter={StaticResource InvertBoolean}}" VerticalAlignment="Stretch" Width="40" Text="{x:Bind nov.Duration, Mode=OneWay}" HorizontalAlignment="Left" Margin="0"/>
+                <TextBox x:Name="cbDuration"   IsEnabled="{x:Bind nov.IsOngoing, Converter={StaticResource InvertBoolean}}" VerticalAlignment="Stretch" Width="40" Text="{x:Bind nov.Duration, Mode=OneWay}" HorizontalAlignment="Left" Margin="0"/>
                 <TextBlock x:Name="lblStartAt" TextWrapping="Wrap" Text="Incepe de la ziua" VerticalAlignment="Top"/>
-                <ComboBox x:Name="cbStartAt"  IsEnabled="{x:Bind nov.Ongoing, Converter={StaticResource InvertBoolean}}"  VerticalAlignment="Stretch" Width="40" SelectedItem="{x:Bind nov.StartAt, Mode=OneWay, Converter={StaticResource ComboBoxItemConvert}}" />
+                <ComboBox x:Name="cbStartAt"  IsEnabled="{x:Bind nov.IsOngoing, Converter={StaticResource InvertBoolean}}"  VerticalAlignment="Stretch" Width="40" SelectedItem="{x:Bind nov.StartAt, Mode=OneWay, Converter={StaticResource ComboBoxItemConvert}}" />
 
                 <CheckBox x:Name="chkRepeat" IsChecked="{x:Bind nov.RecurrenceIsOn, Converter={StaticResource NullBool2Bool}}" Content="Repetare dupa terminare" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="0,20,0,0"/>
 
@@ -81,16 +81,18 @@
                     </StackPanel>
                 </StackPanel>
 
-                <CheckBox x:Name="chkAlarma" IsChecked="{x:Bind nov.Alarm, Converter={StaticResource NullBool2Bool}}" Content="Alarma zilnica" Width="250" Margin="0,20,0,0"/>
-                <StackPanel  Visibility="{Binding IsChecked ,ElementName=chkAlarma,Converter={StaticResource Bool2Vis}}" Orientation="vertical" Margin="25,5,0,0">
-                    <TextBlock Text="La ora" Margin="0,0,40,0"/>
-                    <TimePicker x:Name="tpAlarmTime" HorizontalAlignment="Stretch" VerticalAlignment="Top" Margin="0,0,40,0"  ClockIdentifier="24HourClock" Time="{x:Bind nov.AlarmTime, Converter={StaticResource DateTime2TimeSpan}, Mode=OneWay}"/>
-                </StackPanel>
-                <CheckBox  x:Name="chkDelayedStart" IsEnabled="{x:Bind nov.Ongoing, Converter={StaticResource InvertBoolean}}" IsChecked="{x:Bind nov.SchedStart, Converter={StaticResource NullBool2Bool}}" Content="Incepe la o data ulterioara" Margin="0,20,0,0" />
+                <CheckBox  x:Name="chkDelayedStart" IsEnabled="{x:Bind nov.IsOngoing, Converter={StaticResource InvertBoolean}}" IsChecked="{x:Bind nov.SchedStart, Converter={StaticResource NullBool2Bool}}" Content="Incepe la o data ulterioara" Margin="0,20,0,0" Tapped="ChkDelayedStart_Tapped" />
                 <StackPanel x:Name="stackDelayedStart" Margin="25,5,0,0" Orientation="Vertical"  Visibility="{Binding IsChecked ,ElementName=chkDelayedStart,Converter={StaticResource Bool2Vis}}">
                     <TextBlock Text="Data" Margin="0"/>
                     <DatePicker x:Name="dpScheduledDate"    Width="249" Margin="0" Date="{x:Bind nov.SchedStartDate, Converter={StaticResource DateTime2TimeOffset},Mode=OneWay}" />
                 </StackPanel>
+
+                <CheckBox x:Name="chkAlarma" IsChecked="{x:Bind nov.Alarm, Converter={StaticResource NullBool2Bool}}" Content="Alarma zilnica" Width="250" Margin="0,20,0,0"/>
+                <StackPanel  Visibility="{Binding IsChecked ,ElementName=chkAlarma,Converter={StaticResource Bool2Vis}}" Orientation="vertical" Margin="25,5,0,0">
+                    <TextBlock Text="La ora" Margin="0,0,40,0"/>
+                    <TimePicker x:Name="tpAlarmTime" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0,0,40,0"  ClockIdentifier="24HourClock" Time="{x:Bind nov.AlarmTime, Converter={StaticResource DateTime2TimeSpan}, Mode=OneWay}"/>
+                </StackPanel>
+
             </StackPanel>
         </StackPanel>
     </Grid>

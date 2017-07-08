@@ -18,6 +18,7 @@ using Windows.UI.Xaml.Navigation;
 using Novena_Reminder.Model;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using Novena_Reminder.Controller;
 
 // The Blank Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=234238
 
@@ -65,42 +66,42 @@ namespace Novena_Reminder
         public event PropertyChangedEventHandler PropertyChanged;
         private ObservableCollection<Novena> _Novenas;
 
-       
-        
 
-        public bool initializing { get; private set; }
+
+
+        public bool Initializing { get; private set; }
 
         public MainPage()
         {
-            initializing = true;
+            Initializing = true;
             InitializeComponent();
-         
+
             Loaded += (s, e) =>
                  {
                      ResetListView();
                      SetMultipleSelectionMode(false);
-                  
-                  
+
+
                  };
         }
 
         private void LV_LayoutUpdated(object sender, object e)
         {
-            if (Novenas == null || LV.Items == null || LV.Items.Count< Novenas.Count)
-                initializing = true;
+            if (Novenas == null || LV.Items == null || LV.Items.Count < Novenas.Count)
+                Initializing = true;
             else
-                initializing = false;
-           // LV.ItemContainerGenerator.ItemsChanged += ItemContainerGenerator_ItemsChanged;
+                Initializing = false;
+            // LV.ItemContainerGenerator.ItemsChanged += ItemContainerGenerator_ItemsChanged;
         }
 
-    
+
 
         private void ItemContainerGenerator_ItemsChanged(object sender, ItemsChangedEventArgs e)
         {
-           
+
         }
 
-       
+
 
         private void ResetListView()
         {
@@ -123,7 +124,7 @@ namespace Novena_Reminder
 
 
 
-        private  void AddNovenaButton_Click(object sender, RoutedEventArgs e)
+        private void AddNovenaButton_Click(object sender, RoutedEventArgs e)
         {
             NavigateToDetails();
         }
@@ -131,7 +132,7 @@ namespace Novena_Reminder
         private void MultipleSelectionButton_Click(object sender, RoutedEventArgs e)
         {
             ToggleMultipleSelectionMode();
-            
+
         }
 
         private void SetMultipleSelectionMode(bool state)
@@ -173,11 +174,11 @@ namespace Novena_Reminder
 
         private void OnItemClick(object sender, ItemClickEventArgs e)
         {
-          
-            if  (MultiSelectMode == false)
+
+            if (MultiSelectMode == false)
             {
                 Novena nov = e.ClickedItem as Novena;
-                NavigateToDetails(nov);   
+                NavigateToDetails(nov);
             }
         }
         private void Item_Holding(object sender, HoldingRoutedEventArgs e)
@@ -217,21 +218,49 @@ namespace Novena_Reminder
             ShowItemContextMenu(sender);
         }
 
-      
 
-        private void tgEnabledToggle_Loaded(object sender, RoutedEventArgs e)
+
+        private void TgEnabledToggle_Loaded(object sender, RoutedEventArgs e)
         {
 
             var tg = sender as ToggleSwitch;
 
-            tg.DataContextChanged += Tg_DataContextChanged;
+            tg.Toggled += TgEnabledToggle_Toggled;
         }
 
-        private void Tg_DataContextChanged(FrameworkElement sender, DataContextChangedEventArgs args)
+
+        private void TgEnabledToggle_Toggled(object sender, RoutedEventArgs e)
         {
-            var nov = args.NewValue as Novena;
-            args.Handled = true;
-            Storage.SaveNovena(nov);
+
+            var tg = sender as ToggleSwitch;
+            var nov = tg.DataContext as Novena;
+
+            //check if the togglechange has been manually fired
+            if (nov.IsActive == tg.IsOn)
+            {
+                //nothing to see here, move along;
+                return;
+            }
+
+            if (tg.IsOn)
+                try
+                {
+                    nov.Activate();
+                    Storage.SaveNovena(nov);
+                    
+                }
+                catch (Exception ex)
+                {
+                    Helper.ShowDialog("Novena nu poate fi activata", ex.Message);                    
+                    tg.IsOn = false;
+                }
+            else
+            {
+                nov.Deactivate();
+                Storage.SaveNovena(nov);
+            }
         }
+
+      
     }
 }

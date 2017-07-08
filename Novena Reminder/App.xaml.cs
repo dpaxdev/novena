@@ -1,5 +1,7 @@
-﻿using System;
+﻿using Novena_Reminder.Model;
+using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
@@ -45,6 +47,16 @@ namespace Novena_Reminder
                 this.DebugSettings.EnableFrameRateCounter = false;
             }
 #endif
+
+            //Do Maintenance
+            ObservableCollection<Novena> Novenas = Storage.GetCollection();
+            for (int x = 0; x < Novenas.Count; x++)
+            {
+                var nov = Novenas[x];
+                nov.Maintenance();
+                Novenas[x] = nov;
+            }
+            
             Frame rootFrame = Window.Current.Content as Frame;
 
             // Do not repeat app initialization when the Window already has content,
