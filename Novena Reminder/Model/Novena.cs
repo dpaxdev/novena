@@ -120,29 +120,28 @@ namespace Novena_Reminder
                 if (StartDate == DateTime.MinValue) //i.e. not set           
                     return false; //the Novenna hasn't started yet or something's wrong
 
-                var days = DaysCompleted;
 
-                if (days < 0) return false; //not started yet
-                var repetitions = days / Duration;
+                if (StartDate > DateTime.Now)
+                    return false; //it's in the future. some error must have occured => maintenance should be done.
+
+               var days = DaysCompleted;
+
+                if (days <= 0) return false; //not started yet
+               
 
                 switch (Recurrence)
                 {
                     case RecurrencePattern.Loop:
-
+                        //if we are here it means StartDate is in the past. since we have a neverending loop, this means the novena is ongoing.
+                        return true;
                         break;
                     case RecurrencePattern.RepeatNTimes:
-                        if (repetitions >= Reps)
-                        {
-                            Deactivate();
-                            return false; //just expired;
-                        }
+                        if (RemainingIterations > 0)
+                            return true;
                         break;
                     case RecurrencePattern.RunOnce:
-                        if (repetitions <= 1)
-                        {
-                            Deactivate();
-                            return false; //just expired
-                        }
+                        if (days > Duration)
+                            return false; //we are past novena duration. this should never occur. we should call maintenance.
                         break;
                 }
                 return true;
@@ -152,27 +151,37 @@ namespace Novena_Reminder
         {
             get
             {
-                if (!IsOngoing) return -1;
+               // if (!IsOngoing) return 0;
                 //we should never encounter this but we should check nontheless, else we might divide with 0 and the world would break;
-                if (Duration == 0) return -1;
+                if (Duration == 0) return 0;
 
-                var result = DaysCompleted / Duration;
+                var result = (DaysCompleted / Duration) + 1;
                 return result;
 
             }
         }
+        public int RemainingIterations
+        {
+            get { return Reps - CurrentIteration; }
+        }
+
+
         public int DaysCompleted
         {
             get
             {
+                if (!IsActive) return 0;
                 //we should never encounter this but we should check nontheless, else we might divide with 0 and the world would break;
-                if (Duration == 0) return -1;
+                if (Duration == 0) return 0;
 
                 if (StartDate == DateTime.MinValue) //i.e. not set           
                 {
-                    return -1; //no progress to report for a Novenna that hasn't started yet                
+                    return 0; //no progress to report for a Novenna that hasn't started yet                
                 }
-                return (DateTime.Now.Date - StartDate.Date).Days + StartAt;
+                if (StartDate > DateTime.Now)
+                    return 0; //it's in the future. some error must have occured => maintenance should be done.
+
+                return (DateTime.Now - StartDate).Days + StartAt;
             }
         }
         public int CurrentProgress //returns the current day of the novena if novena is active and has already started
@@ -184,7 +193,7 @@ namespace Novena_Reminder
                     return -1;
                 //we should never encounter this but we should check nontheless, else we might divide with 0 and the world would break;
                 if (Duration == 0) return 0;
-                if (!IsOngoing) return 0; //not started yet
+             //   if (!IsOngoing) return 0; //not started yet
 
                 if (DaysCompleted < 0) return 0; //not started yet maybe                
 

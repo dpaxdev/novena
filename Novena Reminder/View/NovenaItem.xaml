@@ -6,14 +6,14 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
-    d:DesignWidth="434" Height="44.264">
+    d:DesignWidth="434" Height="38.667">
 
-    <Grid Height="34" VerticalAlignment="Top">
+    <Grid VerticalAlignment="Top">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition x:Name="CounterColumn" Width="80"  />
-            <ColumnDefinition x:Name="MasterColumn"  />
-            <ColumnDefinition Width="53"/>
-            <ColumnDefinition x:Name="ActiveColumn" Width="60" />
+            <ColumnDefinition Width="30"/>
+            <ColumnDefinition x:Name="MasterColumn" Width="*"  />
+            <ColumnDefinition Width="58"/>
+            <ColumnDefinition x:Name="ActiveColumn" Width="65" />
         </Grid.ColumnDefinitions>
 
         <FlyoutBase.AttachedFlyout>
@@ -21,25 +21,61 @@
                 <MenuFlyoutItem x:Name="DeleteButton" Text="Delete" />
             </MenuFlyout>
         </FlyoutBase.AttachedFlyout>
-        <TextBlock x:Name="txtProgress" Grid.Column="0" HorizontalAlignment="Left" TextWrapping="Wrap" Text="{Binding Progress}" VerticalAlignment="Center" Width="234"  Height="32" Margin="0,1"/>
+        <StackPanel  VerticalAlignment="Center" BorderBrush="{ThemeResource SystemAccentColor}" BorderThickness="0,0,1,0">
+            <TextBlock x:Name="lblProgress" Text="Ziua "  
+                   Grid.Column="0" FontSize="8"
+                   HorizontalAlignment="Right"  Padding="0,0,7,0" />
+        <TextBlock x:Name="txtProgress" Text="255"  
+                   Grid.Column="0" HorizontalAlignment="Right" TextWrapping="Wrap" FontSize="10"
+                                   VerticalAlignment="Center"  
+                                    Padding="0,0,7,0"  TextAlignment="Right"
+                        />
 
-        <TextBlock x:Name="txtNovennaName" Grid.Column="1" HorizontalAlignment="Left" TextWrapping="Wrap" Text="{Binding Name}" VerticalAlignment="Center" Width="234"  Height="32" Margin="0,1"/>
-        <Grid Grid.Column="2">
+            <TextBlock x:Name="symbolNotStarted" Foreground="{ThemeResource SystemAccentColor}"
+                       HorizontalAlignment="Center" VerticalAlignment="Center" Grid.Column="0"
+                       Text="&#xE73C;" FontFamily="Segoe MDL2 Assets" FontSize="20" 
+                       Padding="0" 
+                       />
+        </StackPanel>
+
+        <TextBlock x:Name="txtNovennaName"
+                   Grid.Column="1" ScrollViewer.VerticalScrollBarVisibility="Disabled" 
+                    VerticalAlignment="Center" Margin="5,0,15,0" 
+                   Text="Novena Sfantului Bernard de Clarvieux"/>
+
+
+        
+
+
+        <Grid Grid.Column="2" VerticalAlignment="Center">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="26"  />
-                <ColumnDefinition Width="26"  />
+                <ColumnDefinition Width="30"  />
+                <ColumnDefinition Width="28"  />
             </Grid.ColumnDefinitions>
-            <TextBlock x:Name="symbolRecurrence" HorizontalAlignment="Left" VerticalAlignment="Center" Grid.Column="0"
-                       Text="&#xE1CA;" FontFamily="Segoe MDL2 Assets"
-                       Padding="3" Width="21" Height="21" Margin="2,4,2,0"
+            <TextBlock x:Name="symbolRecurrence" Foreground="{ThemeResource SystemAccentColor}"
+                       HorizontalAlignment="Left" VerticalAlignment="Center" Grid.Column="0"
+                       Text="&#xE1CA;" FontFamily="Segoe MDL2 Assets" FontSize="28" 
+                       Padding="0" Width="28"  
                        />
-            <TextBlock x:Name="symbolScheduled" HorizontalAlignment="Left" VerticalAlignment="Center"  Grid.Column="1"
-                      Text="&#xE787;" FontFamily="Segoe MDL2 Assets"
-                       Padding="3" Width="21" Height="21" Margin="2,4,2,0"
+
+            <TextBlock x:Name="numRecurrence"  Text="999"
+                       Grid.Column="0" FontSize="10" 
+                       Padding="0,0,3,0" Width="21"  
+                       VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center"
                        />
-        
+
+            <TextBlock x:Name="symbolScheduled" HorizontalAlignment="Center" VerticalAlignment="Center"  Grid.Column="1"
+                       Text="&#xE787;" FontFamily="Segoe MDL2 Assets" FontSize="22"
+                                       Padding="2" Width="25" 
+                       />
+
         </Grid>
-        
-        <ToggleSwitch x:Name="tgEnabledToggle"   IsOn="{Binding IsActive, Mode=TwoWay}"  Grid.Column="3" Header="" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" OffContent="" OnContent="" MinWidth="46" RenderTransformOrigin="0.59,0.697" ScrollViewer.VerticalScrollBarVisibility="Disabled" Margin="7,0" />
+
+        <ToggleSwitch x:Name="tgEnabledToggle"   IsOn="{Binding IsActive, Mode=TwoWay}"  
+                      Grid.Column="3" Header=""   OffContent="" OnContent="" 
+                      MinWidth="50" Width="50"  ScrollViewer.VerticalScrollBarVisibility="Disabled" 
+                      VerticalAlignment="Center" HorizontalAlignment="Center"
+                      
+                      />
     </Grid>
 </UserControl>

@@ -47,7 +47,7 @@ namespace Novena_Reminder
                 if (_Novenas != value)
                 {
                     _Novenas = value;
-                    OnPropertyChanged("SelectedComboBoxOption");
+                    OnPropertyChanged("Novenas");
                 }
             }
         }
@@ -162,14 +162,18 @@ namespace Novena_Reminder
 
         }
 
-        private void RemoveSelectedNovenaButton_Click(object sender, RoutedEventArgs e)
+        private async void RemoveSelectedNovenaButton_Click(object sender, RoutedEventArgs e)
         {
             if (LV.SelectedItems == null || LV.SelectedItems.Count == 0) return;
-
-            foreach (Novena nov in LV.SelectedItems)
+            bool DialogResult = await Helper.ShowNovenaMassDeleteDialog(LV.SelectedItems.Count);
+            if (DialogResult)
             {
-                Storage.DeleteNovena(nov.ID);
-            }
+                foreach (Novena nov in LV.SelectedItems)
+                {
+                    Storage.DeleteNovena(nov.ID);
+                }
+                ResetListView();
+            }            
         }
 
         private void OnItemClick(object sender, ItemClickEventArgs e)
@@ -202,15 +206,17 @@ namespace Novena_Reminder
 
         }
 
-        private void DeleteSingleNovena_click(object sender, RoutedEventArgs e)
+        private async void DeleteSingleNovena_click(object sender, RoutedEventArgs e)
         {
             var menu = sender as MenuFlyoutItem;
 
             Novena nov = menu.DataContext as Novena;
-
-            Storage.DeleteNovena(nov.ID);
-            ResetListView();
-
+            bool DialogResult = await Helper.ShowNovenaDeleteDialog(nov);
+            if (DialogResult)
+            {
+                Storage.DeleteNovena(nov.ID);
+                ResetListView();              
+            }
         }
 
         private void Item_RightClick(object sender, RightTappedRoutedEventArgs e)
@@ -234,7 +240,7 @@ namespace Novena_Reminder
 
             var tg = sender as ToggleSwitch;
             var nov = tg.DataContext as Novena;
-
+            if (nov == null) { return; }//have to investigate why is null.
             //check if the togglechange has been manually fired
             if (nov.IsActive == tg.IsOn)
             {
@@ -243,24 +249,30 @@ namespace Novena_Reminder
             }
 
             if (tg.IsOn)
+            {
+                nov.Activate();
+                Storage.SaveNovena(nov);
+                ResetListView();
+
                 try
                 {
-                    nov.Activate();
-                    Storage.SaveNovena(nov);
-                    
+
+
                 }
                 catch (Exception ex)
                 {
-                    Helper.ShowDialog("Novena nu poate fi activata", ex.Message);                    
+                    Helper.ShowDialog("Novena nu poate fi activata", ex.Message);
                     tg.IsOn = false;
                 }
+            }
             else
             {
                 nov.Deactivate();
                 Storage.SaveNovena(nov);
+                ResetListView();
             }
         }
 
-      
+
     }
 }

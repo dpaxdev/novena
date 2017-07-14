@@ -16,7 +16,10 @@
         <controller:DateTimeToDateTimeOffsetConverter x:Key="DateTime2TimeOffset" />
         <controller:InvertBooleanConverter x:Key="InvertBoolean" />
         <controller:RecurrenceToCheckConvert x:Key="Recurrence2Check" />
+        <controller:RecurrenceToVisibilityConvert x:Key="Recurrence2Vis" />
         <controller:ComboBoxItemConvert x:Key="ComboBoxItemConvert" />
+
+
     </Page.Resources>
     <Page.BottomAppBar>
         <CommandBar>
@@ -25,13 +28,14 @@
             </CommandBar.Content>
             <AppBarButton  Label="Adauga Novena" Click="AddNovenaButton_Click">
                 <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE710;" FontSize="15" Margin="1,3,0,0"  />
+            </AppBarButton>  
+            <AppBarButton  x:Name="abDeleteSelection"   Icon="Delete" Label="Sterge Selectie" Click="RemoveSelectedNovenaButton_Click" Visibility="Collapsed">
+                <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE762;" FontSize="15" Margin="1,3,0,0"  />
             </AppBarButton>
             <AppBarButton x:Name="abMultiselect"   Label="Mod Selectie" Click="MultipleSelectionButton_Click">
                 <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE762;" FontSize="15" Margin="1,3,0,0"  />
             </AppBarButton>
-            <AppBarButton  x:Name="abDeleteSelection"   Icon="Delete" Label="Sterge Selectie" Click="RemoveSelectedNovenaButton_Click" Visibility="Collapsed">
-                <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE762;" FontSize="15" Margin="1,3,0,0"  />
-            </AppBarButton>
+          
         </CommandBar>
     </Page.BottomAppBar>
 
@@ -42,49 +46,95 @@
                  
                   IsItemClickEnabled="True"
                   ItemClick="OnItemClick"     
-                  Background="Transparent"                     
+                  Background="Transparent"    
+                  HorizontalAlignment="Stretch" 
+                  Margin="0"
                   >
+            <ListView.ItemContainerStyle>
+                <Style TargetType="ListViewItem">
+                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                </Style>
+            </ListView.ItemContainerStyle>
             <ListView.ItemTemplate>
                 <DataTemplate  x:DataType="local:Novena">
-                    <Grid Height="34" VerticalAlignment="Top" Holding="Item_Holding" RightTapped="Item_RightClick">
+                    <Grid  VerticalAlignment="Top" Holding="Item_Holding" RightTapped="Item_RightClick" Margin="0,0,0,5" HorizontalAlignment="Stretch">
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition x:Name="CounterColumn" Width="60"  />
-                            <ColumnDefinition x:Name="MasterColumn"  />
-                            <ColumnDefinition x:Name="StatusColumn" Width="53"/>
-                            <ColumnDefinition x:Name="ActiveColumn" Width="60" />
+                            <ColumnDefinition Width="30"/>
+                            <ColumnDefinition x:Name="MasterColumn" Width="*"  />
+                            <ColumnDefinition Width="58"/>
+                            <ColumnDefinition x:Name="ActiveColumn" Width="65" />
                         </Grid.ColumnDefinitions>
+
 
                         <FlyoutBase.AttachedFlyout>
                             <MenuFlyout>
                                 <MenuFlyoutItem x:Name="DeleteButton" Text="Delete" Click="DeleteSingleNovena_click"/>
                             </MenuFlyout>
                         </FlyoutBase.AttachedFlyout>
-                        <TextBlock x:Name="txtProgress" Text="Ziua "  Grid.Column="0" HorizontalAlignment="Left" TextWrapping="Wrap" 
-                                   VerticalAlignment="Center"  Height="32" Margin="0,1"
-                                   Visibility="{x:Bind IsOngoing, Converter={StaticResource Bool2Vis}}">
-                            <Run Text="{x:Bind CurrentProgress}"/>
-                        </TextBlock>
-                        <TextBlock Text="-" Visibility="{x:Bind IsOngoing, Converter={StaticResource InverseBool2Vis} }" Height="32" Margin="0,1" />
+                        <StackPanel  VerticalAlignment="Center" BorderBrush="{ThemeResource SystemAccentColor}" BorderThickness="0,0,1,0">
+                            <TextBlock x:Name="lblProgress" Text="Ziua "  
+                                       Visibility="{x:Bind IsOngoing, Converter={StaticResource Bool2Vis}}"
+                                       Grid.Column="0" FontSize="10"
+                                       HorizontalAlignment="Right"  Padding="0,0,7,0"
+                                   
+                                  />
 
-                        <TextBlock x:Name="txtNovennaName" Grid.Column="1" HorizontalAlignment="Left" TextWrapping="Wrap" 
-                                   Text="{Binding Name}" VerticalAlignment="Center" Width="234"  Height="32" Margin="0,1"/>
-                        <Grid Grid.Column="2">
+                            <TextBlock x:Name="txtProgress" Text="{x:Bind CurrentProgress}"  
+                                       Visibility="{x:Bind IsOngoing, Converter={StaticResource Bool2Vis}}"
+                                    Foreground="{ThemeResource SystemAccentColor}"
+                                    Grid.Column="0" HorizontalAlignment="Right" TextWrapping="Wrap" FontSize="12"
+                                    VerticalAlignment="Center"  
+                                    Padding="0,0,7,0"  TextAlignment="Right"                           
+                                  />
+                            <TextBlock x:Name="symbolNotStarted" Foreground="{ThemeResource SystemAccentColor}"
+                                       Visibility="{x:Bind IsOngoing, Converter={StaticResource InverseBool2Vis}}"
+                                    HorizontalAlignment="Center" VerticalAlignment="Center" Grid.Column="0"
+                                    Text="&#xE73C;" FontFamily="Segoe MDL2 Assets" FontSize="20" 
+                                    Padding="0" 
+                       />
+                        </StackPanel>
+                        <TextBlock x:Name="txtNovennaName" Text="{Binding Name}" 
+                                   Grid.Column="1" TextWrapping="WrapWholeWords"
+                                   VerticalAlignment="Center" Margin="5,0,15,0" />
+
+
+                        <Grid Grid.Column="2" VerticalAlignment="Center">
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="26"  />
-                                <ColumnDefinition Width="26"  />
+                                <ColumnDefinition Width="30"  />
+                                <ColumnDefinition Width="28"  />
                             </Grid.ColumnDefinitions>
-                            <TextBlock x:Name="symbolRecurrence" HorizontalAlignment="Left" VerticalAlignment="Center" Grid.Column="0"
-                                Text="&#xE1CA;" FontFamily="Segoe MDL2 Assets"
-                                Padding="3" Width="21" Height="21" Margin="2,4,2,0">                                
-                            </TextBlock>
-                            <TextBlock x:Name="symbolScheduled" HorizontalAlignment="Left" VerticalAlignment="Center"  Grid.Column="1"
-                                Text="&#xE787;" FontFamily="Segoe MDL2 Assets"
-                                Padding="3" Width="21" Height="21" Margin="2,4,2,0" >                                
-                            </TextBlock>
+                            <TextBlock x:Name="symbolRecurrence" Foreground="{ThemeResource SystemAccentColor}"
+                                        Visibility="{x:Bind RecurrenceIsOn, Converter={StaticResource Bool2Vis}}"
+                       HorizontalAlignment="Left" VerticalAlignment="Center" Grid.Column="0"
+                       Text="&#xE1CA;" FontFamily="Segoe MDL2 Assets" FontSize="28" 
+                       Padding="0" Width="28"  
+                       />
+
+                            <TextBlock x:Name="numRecurrence"   Text="{x:Bind Reps}"
+                                       Visibility="{x:Bind Recurrence, Converter={StaticResource Recurrence2Vis}, ConverterParameter=RepeatNTimes}"
+                                       
+                       Grid.Column="0" FontSize="10" 
+                       Padding="0,0,3,0" Width="21"  
+                       VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center"
+                       />
+
+                            <TextBlock x:Name="symbolScheduled" 
+                                       Visibility="{x:Bind SchedStart, Converter={StaticResource Bool2Vis}}"
+                                       
+                                       HorizontalAlignment="Center" VerticalAlignment="Center"  Grid.Column="1"
+                       Text="&#xE787;" FontFamily="Segoe MDL2 Assets" FontSize="22"
+                                       Padding="2" Width="25" 
+                       />
 
                         </Grid>
 
-                        <ToggleSwitch x:Name="tgEnabledToggle"  Loaded="TgEnabledToggle_Loaded" IsOn="{Binding IsActive, Mode=OneWay}"  Grid.Column="3" Header="" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" OffContent="" OnContent="" MinWidth="46" RenderTransformOrigin="0.59,0.697" ScrollViewer.VerticalScrollBarVisibility="Disabled" Margin="7,0" />
+                     
+
+                        <ToggleSwitch x:Name="tgEnabledToggle"  Loaded="TgEnabledToggle_Loaded" IsOn="{Binding IsActive, Mode=OneWay}"   
+                                       Grid.Column="3" Header=""   OffContent="" OnContent="" 
+                      MinWidth="50" Width="50"  ScrollViewer.VerticalScrollBarVisibility="Disabled" 
+                      VerticalAlignment="Center" HorizontalAlignment="Center"
+                                      />
                     </Grid>
                 </DataTemplate>
 

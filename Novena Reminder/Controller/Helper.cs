@@ -13,11 +13,65 @@ namespace Novena_Reminder.Controller
     {
         public static ToastNotifier tn;
 
+        public static async Task<bool> ShowNovenaDeleteDialog(Novena nov)
+        {
+
+            ContentDialog deleteDialog = new ContentDialog
+            {
+                Title = "Stergere novena",
+                Content = "Sigur doriti sa stergeti aceasta novena?",
+                PrimaryButtonText = "Sterge",
+                SecondaryButtonText = "Nu"
+            };
+
+            if (nov.IsOngoing)
+                deleteDialog.Content = "Aceasta novena este in desfasurare.\n" + deleteDialog.Content;
+            ContentDialogResult result = await deleteDialog.ShowAsync();
+
+            // Delete the novena if the user clicked the primary button.
+
+            if (result == ContentDialogResult.Primary)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+
+        }
+
+        public static async Task<bool> ShowNovenaMassDeleteDialog(int count)
+        {
+
+            ContentDialog deleteDialog = new ContentDialog
+            {
+                Title = count > 1 ? "Stergere " + count + " novene selectate" : "Stergere novena selectata",
+                Content = "Sigur doriti sa stergeti " + (count > 1 ? "aceste novene" : "aceasta novena?"),
+                PrimaryButtonText = "Sterge",
+                SecondaryButtonText = "Nu"
+            };
+
+            ContentDialogResult result = await deleteDialog.ShowAsync();
+
+            // Delete the novena if the user clicked the primary button.
+
+            if (result == ContentDialogResult.Primary)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+
+        }
+
+
         public static void ManageAlarms(Novena nov)
         {
             if (tn == null)
                 tn = ToastNotificationManager.CreateToastNotifier();
-
 
             var Notifications = tn.GetScheduledToastNotifications();
             //Step 1: delete all notifications for this Novena if any
@@ -65,18 +119,21 @@ namespace Novena_Reminder.Controller
         private static void AddScheduledToastNotification(string group, string title, string contentText, DateTime time)
         {
 
-            ToastContent content = new ToastContent()
+            if (time < DateTime.Now) return; //cannot schedule a notification in the past, app would crash...
+            if (group != null && group != "")
             {
-                Duration = ToastDuration.Long,
-                
-
-                Visual = new ToastVisual()
+                ToastContent content = new ToastContent()
                 {
+                    Duration = ToastDuration.Long,
 
-                    AddImageQuery = false,
-                    BindingGeneric = new ToastBindingGeneric()
+
+                    Visual = new ToastVisual()
                     {
-                        Children =
+
+                        AddImageQuery = false,
+                        BindingGeneric = new ToastBindingGeneric()
+                        {
+                            Children =
                         {
                             new AdaptiveText()
                             {
@@ -89,32 +146,35 @@ namespace Novena_Reminder.Controller
                                 Text = contentText
                             }
                         }
-                    }
-                },
-                Scenario = ToastScenario.Reminder,
-                Audio = new ToastAudio()
-                {
-                    Src = new Uri("ms-winsoundevent:Notification.Looping.Alarm"),
-                    Loop = true,
-                    Silent = false
-                },
-                Actions = new ToastActionsCustom()
-                {
-                    Buttons =
+                        }
+                    },
+                    Scenario = ToastScenario.Reminder,
+                    Audio = new ToastAudio()
+                    {
+                        Src = new Uri("ms-winsoundevent:Notification.Looping.Alarm"),
+                        Loop = true,
+                        Silent = false
+                    },
+                    Actions = new ToastActionsCustom()
+                    {
+                        Buttons =
                     {
                        new ToastButtonSnooze(),
                        new ToastButtonDismiss()
                     }
-                }
-            };
+                    }
+                };
 
-            var xml = content.GetXml();
 
-            var scheduledToast = new ScheduledToastNotification(xml, new DateTimeOffset(time))
-            {
-                Group = group
-            };
-            tn.AddToSchedule(scheduledToast);
+
+                var xml = content.GetXml();
+
+                var scheduledToast = new ScheduledToastNotification(xml, new DateTimeOffset(time))
+                {
+                    Group = group
+                };
+                tn.AddToSchedule(scheduledToast);
+            }
         }
 
         public static void ShowDialog(string title, string content)
@@ -349,6 +409,28 @@ namespace Novena_Reminder.Controller
             catch
             {
                 return false;
+            }
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, string language)
+        {
+            return value;
+        }
+    }
+
+    public class RecurrenceToVisibilityConvert : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, string language)
+        {
+            try
+            {
+                var rec = (Novena.RecurrencePattern)value;
+                Novena.RecurrencePattern param = (Novena.RecurrencePattern)Enum.Parse(typeof(Novena.RecurrencePattern), parameter.ToString());
+                return rec == param ? Visibility.Visible : Visibility.Collapsed;
+            }
+            catch
+            {
+                return Visibility.Collapsed;
             }
         }
 

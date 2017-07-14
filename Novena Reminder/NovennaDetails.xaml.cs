@@ -1,6 +1,7 @@
 ﻿using Novena_Reminder.Controller;
 using Novena_Reminder.Model;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Windows.UI.Core;
 using Windows.UI.Xaml;
@@ -45,10 +46,6 @@ namespace Novena_Reminder
 
         private void ComboboxSetSelectedValue(ComboBox comboBox, object value)
         {
-            var selected = new ComboBoxItem()
-            {
-                Content = value
-            };
             comboBox.SelectedItem = value;
         }
 
@@ -62,7 +59,10 @@ namespace Novena_Reminder
         private void PopuplateCBStartAt()
         {
             Helper.PopulateComboboxWithIntInterval(cbStartAt, 1, ParseValueToInt(cbDuration.Text), 1);
-            ComboboxSetSelectedValue(cbStartAt, nov.StartAt);
+            if (nov.StartAt > 0)
+                ComboboxSetSelectedValue(cbStartAt, nov.StartAt);
+            else
+                ComboboxSetSelectedValue(cbStartAt, 1);
         }
 
         private int ParseValueToInt(string text)
@@ -112,7 +112,7 @@ namespace Novena_Reminder
 
         private async void ButtonDelete_Click(object sender, RoutedEventArgs e)
         {
-            bool DialogResult = await ShowNovenaDeleteDialog();
+            bool DialogResult = await Helper.ShowNovenaDeleteDialog(nov);
             if (DialogResult)
             {
                 Storage.DeleteNovena(nov.ID);
@@ -120,34 +120,7 @@ namespace Novena_Reminder
             }
         }
 
-        private async Task<bool> ShowNovenaDeleteDialog()
-        {
-
-            ContentDialog deleteDialog = new ContentDialog
-            {
-                Title = "Stergere novena",
-                Content = "Sigur doriti sa stergeti aceasta novena?",
-                PrimaryButtonText = "Sterge",
-                SecondaryButtonText = "Nu"
-            };
-
-            if (nov.IsOngoing)
-                deleteDialog.Content = "Aceasta novena este in desfasurare.\n" + deleteDialog.Content;
-            ContentDialogResult result = await deleteDialog.ShowAsync();
-
-            // Delete the novena if the user clicked the primary button.
-
-            if (result == ContentDialogResult.Primary)
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-
-        }
-
+       
 
 
         private void ButtonCancel_Click(object sender, RoutedEventArgs e)
@@ -158,16 +131,96 @@ namespace Novena_Reminder
 
         private void ButtonSave_Click(object sender, RoutedEventArgs e)
         {
-
-            SaveNovena();
-            NavigateToMainPage();
+            if (DoValidation())
+            {
+                SaveNovena();
+                NavigateToMainPage();
+            }
 
         }
 
-        private void NavigateToMainPage()
-
+        private bool DoValidation()
         {
 
+            Dictionary<string, object> Errors = new Dictionary<string, object>();
+            if (txtNume.Text == "")
+            {
+                Errors.Add("Specificati un nume pentru novena.", txtNume);
+            }
+
+            if (cbDuration.Text == "")
+            {
+                Errors.Add("Indicati durata in zile a novenei.", cbDuration);
+            }
+            else
+            {
+                var isInt = int.TryParse(cbDuration.Text, out int duration);
+                if (!isInt)
+                    Errors.Add("Durata novenei trebuie sa fie un numar.", cbDuration);
+                else if (duration <= 0)
+                    Errors.Add("Durata novenei trebuie sa fie mai mare decat 0.", cbDuration);
+            }
+            if (chkDelayedStart.IsChecked == true && dpScheduledDate.Date < DateTime.Today)
+                Errors.Add("Ati ales inceperea cu intarziere a novenei. Nu puteti programa inceperea novenei in trecut, alegeti o data din viitor.", cbDuration);
+
+
+            if (Errors.Count > 0)
+            {
+                ShowErrors(Errors);
+                return false;
+            }
+            else return true;
+        }
+
+        private void ShowErrors(Dictionary<string, object> errors)
+        {
+            string Output = errors.Count>1?"Corectati urmatoarele erori pentru a putea salva:\n":"Corectati eroarea urmatoare pentru a putea salva:\n";
+           
+            foreach (KeyValuePair<string, object> kv in errors)
+            {
+                Output += "\n\u2022 " + kv.Key;
+                HighlightInputError(kv.Value);
+            }
+            Helper.ShowDialog("Novena nu poate fi salvata", Output);
+        }
+
+        private void HighlightInputError(object value)
+        {
+
+            switch (value.GetType().Name)
+            {
+                case "TextBox":
+                    ((TextBox)value).Style = (Style)Resources["tbHighlight"];
+                    ((TextBox)value).TextChanged += NovenaDetails_TextChanged;
+                    break;
+                case "DatePicker":
+                    ((DatePicker)value).Style = (Style)Resources["dpHighlight"];
+                    ((DatePicker)value).DateChanged += NovenaDetails_DateChanged;
+                    break;
+
+                default:
+                    break;
+
+            }
+            
+        }
+
+        private void NovenaDetails_DateChanged(object sender, DatePickerValueChangedEventArgs e)
+        {
+            var dp = sender as DatePicker;
+            dp.Style = new Style() { TargetType = typeof(DatePicker) };
+            dp.DateChanged -= NovenaDetails_DateChanged;
+        }
+
+        private void NovenaDetails_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            var tb = sender as TextBox;
+            tb.Style = new Style() { TargetType = typeof(TextBox) };
+            tb.TextChanged -= NovenaDetails_TextChanged;
+        }
+
+        private void NavigateToMainPage()
+        {
             Frame.Navigate(typeof(MainPage), "Back", new EntranceNavigationTransitionInfo());
         }
 
@@ -245,7 +298,18 @@ namespace Novena_Reminder
 
         private void ChkDelayedStart_Tapped(object sender, Windows.UI.Xaml.Input.TappedRoutedEventArgs e)
         {
+            var chk = sender as CheckBox;
 
+
+            if (chk.IsChecked == true && dpScheduledDate.Date < DateTime.Today)
+            {
+                dpScheduledDate.Date = DateTime.Today;
+            }
+
+            if (chk.IsChecked == false)
+            {
+                dpScheduledDate.Date = nov.SchedStartDate;
+            }
         }
     }
 }
