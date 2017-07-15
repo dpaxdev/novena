@@ -68,7 +68,7 @@
 
                         <FlyoutBase.AttachedFlyout>
                             <MenuFlyout>
-                                <MenuFlyoutItem x:Name="DeleteButton" x:Uid="DeleteButton"  Click="DeleteSingleNovena_click"/>
+                                <MenuFlyoutItem x:Name="DeleteButton" x:Uid="DeleteButton" Text="Delete" Click="DeleteSingleNovena_click"/>
                             </MenuFlyout>
                         </FlyoutBase.AttachedFlyout>
                         <StackPanel  VerticalAlignment="Center" BorderBrush="{ThemeResource SystemAccentColor}" BorderThickness="0,0,1,0">

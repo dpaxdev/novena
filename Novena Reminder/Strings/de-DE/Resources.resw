@@ -231,6 +231,15 @@
   <data name="abMultiselect.Label" xml:space="preserve">
     <value>Auswahlmodus</value>
   </data>
+  <data name="ButtonCancel.Label" xml:space="preserve">
+    <value>Änderungen zurücksetzen</value>
+  </data>
+  <data name="ButtonDelete.Label" xml:space="preserve">
+    <value>Löschen</value>
+  </data>
+  <data name="ButtonSave.Label" xml:space="preserve">
+    <value>Speichern</value>
+  </data>
   <data name="DeleteButton.Text" xml:space="preserve">
     <value>Löschen</value>
   </data>
