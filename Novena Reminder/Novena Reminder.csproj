@@ -96,6 +96,9 @@
     <None Include="ClassDiagram1.cd" />
     <None Include="Novena Reminder_StoreKey.pfx" />
     <None Include="project.json" />
+    <PRIResource Include="Strings\de-DE\Resources.resw" />
+    <PRIResource Include="Strings\en-US\Resources.resw" />
+    <PRIResource Include="Strings\ro-RO\Resources.resw" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="App.xaml.cs">

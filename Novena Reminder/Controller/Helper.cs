@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Windows.ApplicationModel.Resources;
 using Windows.UI.Notifications;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
@@ -13,19 +14,26 @@ namespace Novena_Reminder.Controller
     {
         public static ToastNotifier tn;
 
+        public static ResourceLoader loader = new ResourceLoader();
+        public static string _t(string stringName)
+        {
+
+            return loader.GetString(stringName);
+        }
+
         public static async Task<bool> ShowNovenaDeleteDialog(Novena nov)
         {
 
             ContentDialog deleteDialog = new ContentDialog
             {
-                Title = "Stergere novena",
-                Content = "Sigur doriti sa stergeti aceasta novena?",
-                PrimaryButtonText = "Sterge",
-                SecondaryButtonText = "Nu"
+                Title = _t("s0029"),//"Stergere novena",
+                Content = _t("s0025"),// "Sigur doriti sa stergeti aceasta novena?",
+                PrimaryButtonText = _t("s0027"),//"Sterge",
+                SecondaryButtonText = _t("s0021")//"Nu"
             };
 
             if (nov.IsOngoing)
-                deleteDialog.Content = "Aceasta novena este in desfasurare.\n" + deleteDialog.Content;
+                deleteDialog.Content = _t("s0026") + "\n" + deleteDialog.Content;//Aceasta novena este in desfasurare.
             ContentDialogResult result = await deleteDialog.ShowAsync();
 
             // Delete the novena if the user clicked the primary button.
@@ -46,10 +54,10 @@ namespace Novena_Reminder.Controller
 
             ContentDialog deleteDialog = new ContentDialog
             {
-                Title = count > 1 ? "Stergere " + count + " novene selectate" : "Stergere novena selectata",
-                Content = "Sigur doriti sa stergeti " + (count > 1 ? "aceste novene" : "aceasta novena?"),
-                PrimaryButtonText = "Sterge",
-                SecondaryButtonText = "Nu"
+                Title = count > 1 ? String.Format(_t("s0024"), count) : _t("s0030"),//"Stergere " + count + " novene selectate" : "Stergere novena selectata",
+                Content = count > 1 ? _t("s0023") : _t("s0025"), //"Sigur doriti sa stergeti " + (count > 1 ? "aceste novene" : "aceasta novena?"),
+                PrimaryButtonText = _t("s0027"), //"Sterge",
+                SecondaryButtonText = _t("s0021") //"Nu"
             };
 
             ContentDialogResult result = await deleteDialog.ShowAsync();
@@ -111,7 +119,7 @@ namespace Novena_Reminder.Controller
                         var Delay = ScheduledAlarmDate.Subtract(CurrentDate);
                         AlarmTime = CurrentDate.AddDays((x - nov.CurrentProgress) + Delay.Days);
                     }
-                    AddScheduledToastNotification(nov.ID, nov.Name, "Ziua " + nov.CurrentProgress.ToString(), AlarmTime);
+                    AddScheduledToastNotification(nov.ID, nov.Name, String.Format(_t("s0031"),nov.CurrentProgress.ToString() ) , AlarmTime);
                 }
             }
         }
@@ -183,7 +191,7 @@ namespace Novena_Reminder.Controller
             {
                 Title = title,
                 Content = content,
-                PrimaryButtonText = "OK"
+                PrimaryButtonText = _t("OK")//"OK"
             };
             WarningDialog.ShowAsync().GetResults();
         }

@@ -261,7 +261,7 @@ namespace Novena_Reminder
                 }
                 catch (Exception ex)
                 {
-                    Helper.ShowDialog("Novena nu poate fi activata", ex.Message);
+                    Helper.ShowDialog(_t("e0019"), ex.Message);//"Novena nu poate fi activata"
                     tg.IsOn = false;
                 }
             }
@@ -273,6 +273,10 @@ namespace Novena_Reminder
             }
         }
 
-
+        //remap for fast access:
+        private string _t(string stringName)
+        {
+            return Helper._t(stringName);
+        }
     }
 }

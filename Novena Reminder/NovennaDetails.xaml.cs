@@ -9,6 +9,7 @@ using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Media.Animation;
 using Windows.UI.Xaml.Navigation;
 
+
 // The Blank Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=234238
 
 namespace Novena_Reminder
@@ -77,13 +78,13 @@ namespace Novena_Reminder
             if (e.Parameter != null)
             {
                 nov = e.Parameter as Novena;
-                lblNovennaDetailsActionType.Text = "Modifica ";
+                lblNovennaDetailsActionType.Text = _t("s0017");//"Modifica ";
             }
             if (nov == null)
             {
                 nov = new Novena();
-                lblNovennaDetailsActionType.Text = "Adauga ";
-                nov.Name = "Novena";
+                lblNovennaDetailsActionType.Text = _t("s0002");//"Adauga ";
+                nov.Name = _t("s0018");// "Novena";
 
             }
 
@@ -145,23 +146,23 @@ namespace Novena_Reminder
             Dictionary<string, object> Errors = new Dictionary<string, object>();
             if (txtNume.Text == "")
             {
-                Errors.Add("Specificati un nume pentru novena.", txtNume);
+                Errors.Add(_t("e0026"), txtNume);//"Specificati un nume pentru novena."
             }
 
             if (cbDuration.Text == "")
             {
-                Errors.Add("Indicati durata in zile a novenei.", cbDuration);
+                Errors.Add(_t("e0001"), cbDuration);//"Indicati durata in zile a novenei."
             }
             else
             {
                 var isInt = int.TryParse(cbDuration.Text, out int duration);
                 if (!isInt)
-                    Errors.Add("Durata novenei trebuie sa fie un numar.", cbDuration);
+                    Errors.Add(_t("e0002"), cbDuration);//"Durata novenei trebuie sa fie un numar."
                 else if (duration <= 0)
-                    Errors.Add("Durata novenei trebuie sa fie mai mare decat 0.", cbDuration);
+                    Errors.Add(_t("e0003"), cbDuration);//"Durata novenei trebuie sa fie mai mare decat 0."
             }
             if (chkDelayedStart.IsChecked == true && dpScheduledDate.Date < DateTime.Today)
-                Errors.Add("Ati ales inceperea cu intarziere a novenei. Nu puteti programa inceperea novenei in trecut, alegeti o data din viitor.", cbDuration);
+                Errors.Add(_t("e0005"), cbDuration);//"Ati ales inceperea cu intarziere a novenei. Nu puteti programa inceperea novenei in trecut, alegeti o data din viitor."
 
 
             if (Errors.Count > 0)
@@ -174,14 +175,14 @@ namespace Novena_Reminder
 
         private void ShowErrors(Dictionary<string, object> errors)
         {
-            string Output = errors.Count>1?"Corectati urmatoarele erori pentru a putea salva:\n":"Corectati eroarea urmatoare pentru a putea salva:\n";
-           
+            string Output = errors.Count > 1 ? _t("e0007") : _t("e0006");//"Corectati urmatoarele erori pentru a putea salva:":"Corectati eroarea urmatoare pentru a putea salva:";
+            Output += "\n";
             foreach (KeyValuePair<string, object> kv in errors)
             {
                 Output += "\n\u2022 " + kv.Key;
                 HighlightInputError(kv.Value);
             }
-            Helper.ShowDialog("Novena nu poate fi salvata", Output);
+            Helper.ShowDialog(_t("e0020"), Output);//"Novena nu poate fi salvata"
         }
 
         private void HighlightInputError(object value)
@@ -237,7 +238,7 @@ namespace Novena_Reminder
             }
             catch (InvalidOperationException ex)
             {
-                Helper.ShowDialog("Novena nu poate fi activata", ex.Message);
+                Helper.ShowDialog(_t("e0019"), ex.Message);//"Novena nu poate fi activata"
                 togIsActive.IsOn = false;
             }
             if (success == true)
@@ -310,6 +311,12 @@ namespace Novena_Reminder
             {
                 dpScheduledDate.Date = nov.SchedStartDate;
             }
+        }
+
+        //remap for fast access:
+        private string _t (string stringName)
+        {
+            return Helper._t(stringName);
         }
     }
 }

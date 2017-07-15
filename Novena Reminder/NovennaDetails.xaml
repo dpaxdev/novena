@@ -59,63 +59,72 @@
                           Foreground="{ThemeResource AppBarItemForegroundThemeBrush}" 
                           IsTextScaleFactorEnabled="False" >
                     <Run x:Name="lblNovennaDetailsActionType"/>
-                    <Run Text="Novena" />
+                    <Run x:Uid="lblNovena" />
             </TextBlock>
-            <ToggleSwitch x:Name="togIsActive" OnContent="Activa" OffContent="Inactiva" HorizontalAlignment="Right" Width="60" Margin="0,-2,10,2" MinWidth="100" IsOn="{x:Bind nov.IsActive, Mode=OneWay}" />
+            <ToggleSwitch x:Name="togIsActive" x:Uid="togIsActive" HorizontalAlignment="Right" Width="68" Margin="0,-2,10,2" 
+                          MinWidth="110" IsOn="{x:Bind nov.IsActive, Mode=OneWay}" />
         </Grid>
 
         <ScrollViewer Grid.Row="1" Padding="20,10,20,0" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
             <StackPanel Orientation="Vertical"  >
                 <StackPanel x:Name="StatusPanel" Padding="5" Visibility="{x:Bind nov.IsOngoing, Converter={StaticResource Bool2Vis}}"  Orientation="Vertical" BorderBrush="Coral" BorderThickness="1" Margin="0,5,0,20">
-                    <TextBlock x:Name="lblStatus" Text="Ziua " >
+                    <TextBlock x:Name="lblStatus"  >
+                    <Run x:Uid="lblZiua" />
                     <Run Text="{x:Bind nov.CurrentProgress}"/>
-                    <Run Text=" din "/>
+                    <Run x:Uid="lblDin" />
                     <Run Text="{x:Bind nov.Duration}" />
                     </TextBlock>
-                    <TextBlock x:Name="lblCurrentIterationOfN" Text="Repetitia "  Visibility="{x:Bind nov.Recurrence, Converter={StaticResource Recurrence2Vis}, ConverterParameter=RepeatNTimes}" >
+                    <TextBlock x:Name="lblCurrentIterationOfN"  
+                               Visibility="{x:Bind nov.Recurrence, Converter={StaticResource Recurrence2Vis}, ConverterParameter=RepeatNTimes}" >
+                    <Run x:Uid="Repetitia"/>
                     <Run Text="{x:Bind nov.CurrentIteration}"/>
-                    <Run Text=" din "/>
+                    <Run x:Uid="lblDin" />
                     <Run Text="{x:Bind nov.Reps}"/>
 
                     </TextBlock>
-                    <TextBlock x:Name="lblCurrentIteration" Text="Repetitia "  Visibility="{x:Bind nov.Recurrence, Converter={StaticResource Recurrence2Vis}, ConverterParameter=Loop}" >
-                    <Run Text="{x:Bind nov.CurrentIteration}"/>
+                    <TextBlock x:Name="lblCurrentIteration"   
+                               Visibility="{x:Bind nov.Recurrence, Converter={StaticResource Recurrence2Vis}, ConverterParameter=Loop}" >
+                     <Run x:Uid="lblRepetitia"/>
+                        <Run Text="{x:Bind nov.CurrentIteration}"/>
                     </TextBlock>
                 </StackPanel>
                 <StackPanel Orientation="Vertical" >
 
-                    <TextBlock x:Name="lblNumeNovena"  TextWrapping="Wrap" Text="Nume novena" VerticalAlignment="Top"/>
-                    <TextBox x:Name="txtNume" TextWrapping="Wrap" Text="{x:Bind nov.Name}" VerticalAlignment="Top" Margin="0,0,0,0" Height="19"/>
+                    <TextBlock  x:Uid="lblNumeNovena"  TextWrapping="Wrap"  VerticalAlignment="Top"/>
+                    <TextBox x:Name="txtNume" TextWrapping="Wrap" Text="{x:Bind nov.Name}" VerticalAlignment="Top" 
+                             Margin="0,0,0,0" Height="19"/>
 
-                    <TextBlock x:Name="textBlock" TextWrapping="Wrap" Text="Durata in zile" VerticalAlignment="Top"/>
+                    <TextBlock x:Uid="lblDuration" TextWrapping="Wrap"  VerticalAlignment="Top"/>
                     <TextBox x:Name="cbDuration"   IsEnabled="{x:Bind nov.IsOngoing, Converter={StaticResource InvertBoolean}}"
                              VerticalAlignment="Stretch" Width="80" Text="{x:Bind nov.Duration, Mode=OneWay}" HorizontalAlignment="Left"
                              InputScope="Digits"
                              />
-                    <TextBlock x:Name="lblStartAt" TextWrapping="Wrap" Text="Incepe de la ziua" VerticalAlignment="Top"/>
+                    <TextBlock x:Uid="lblStartAt" TextWrapping="Wrap"  VerticalAlignment="Top"/>
                     <ComboBox x:Name="cbStartAt"  IsEnabled="{x:Bind nov.IsOngoing, Converter={StaticResource InvertBoolean}}"  VerticalAlignment="Stretch" Width="80" SelectedItem="{x:Bind nov.StartAt, Mode=OneWay, Converter={StaticResource ComboBoxItemConvert}}" />
 
-                    <CheckBox x:Name="chkRepeat" IsChecked="{x:Bind nov.RecurrenceIsOn, Converter={StaticResource NullBool2Bool}}" Content="Repetare dupa terminare" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="0,20,0,0"/>
+                    <CheckBox x:Name="chkRepeat" x:Uid="chkRepeat" IsChecked="{x:Bind nov.RecurrenceIsOn, Converter={StaticResource NullBool2Bool}}"  HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="0,20,0,0"/>
 
                     <StackPanel  Margin="25,5,0,0" Visibility="{Binding IsChecked ,ElementName=chkRepeat,Converter={StaticResource Bool2Vis}}">
-                        <RadioButton x:Name="rbInfiniteLoop" IsChecked="{x:Bind nov.Recurrence, Converter={StaticResource Recurrence2Check}, ConverterParameter=Loop}" Content="Repetare continua" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="0" GroupName="RepetitionType" />
+                        <RadioButton x:Name="rbInfiniteLoop" x:Uid="rbInfiniteLoop"  IsChecked="{x:Bind nov.Recurrence, Converter={StaticResource Recurrence2Check}, ConverterParameter=Loop}" Content="Repetare continua" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="0" GroupName="RepetitionType" />
 
                         <StackPanel Orientation="Horizontal">
-                            <RadioButton x:Name="rbNtimes" IsChecked="{x:Bind nov.Recurrence, Converter={StaticResource Recurrence2Check}, ConverterParameter=RepeatNTimes}" Content="De " VerticalAlignment="Center" Margin="0"  Width="55" MinWidth="0" GroupName="RepetitionType"/>
+                            <RadioButton x:Name="rbNtimes" x:Uid="rbNtimes_pre" IsChecked="{x:Bind nov.Recurrence, Converter={StaticResource Recurrence2Check}, ConverterParameter=RepeatNTimes}" Content="De " VerticalAlignment="Center" Margin="0"  Width="55" MinWidth="0" GroupName="RepetitionType"/>
                             <TextBox x:Name="cbRepeatNTimes" Text="{x:Bind nov.Reps}" InputScope="Digits" HorizontalAlignment="Left"  VerticalAlignment="Center" Width="48" />
-                            <TextBlock Text="ori"  VerticalAlignment="Center" Width="20" Margin="6,0,0,0" />
+                            <TextBlock x:Uid="rbNtimes_post"  VerticalAlignment="Center" Width="30" Margin="6,0,0,0" />
                         </StackPanel>
                     </StackPanel>
 
-                    <CheckBox  x:Name="chkDelayedStart" IsEnabled="{x:Bind nov.IsOngoing, Converter={StaticResource InvertBoolean}}" IsChecked="{x:Bind nov.SchedStart, Converter={StaticResource NullBool2Bool}}" Content="Incepe la o data ulterioara" Margin="0,20,0,0" Tapped="ChkDelayedStart_Tapped" />
+                    <CheckBox  x:Name="chkDelayedStart" x:Uid="chkDelayedStart" IsEnabled="{x:Bind nov.IsOngoing, Converter={StaticResource InvertBoolean}}" 
+                               IsChecked="{x:Bind nov.SchedStart, Converter={StaticResource NullBool2Bool}}" Margin="0,20,0,0" Tapped="ChkDelayedStart_Tapped" />
                     <StackPanel x:Name="stackDelayedStart" Margin="25,5,0,0" Orientation="Vertical"  Visibility="{Binding IsChecked ,ElementName=chkDelayedStart,Converter={StaticResource Bool2Vis}}">
-                        <TextBlock Text="Data" Margin="0"/>
+                        <TextBlock x:Uid="lblData" Margin="0"/>
                         <DatePicker x:Name="dpScheduledDate"     Width="249" Margin="0" Date="{x:Bind nov.SchedStartDate, Converter={StaticResource DateTime2TimeOffset},Mode=OneWay}" />
                     </StackPanel>
 
-                    <CheckBox x:Name="chkAlarma" IsChecked="{x:Bind nov.Alarm, Converter={StaticResource NullBool2Bool}}" Content="Alarma zilnica" Width="250" Margin="0,20,0,0"/>
+                    <CheckBox x:Name="chkAlarma" x:Uid="chkAlarma" IsChecked="{x:Bind nov.Alarm, Converter={StaticResource NullBool2Bool}}" 
+                              Width="250" Margin="0,20,0,0"/>
                     <StackPanel  Visibility="{Binding IsChecked ,ElementName=chkAlarma,Converter={StaticResource Bool2Vis}}" Orientation="vertical" Margin="25,5,0,0">
-                        <TextBlock Text="La ora" Margin="0,0,40,0"/>
+                        <TextBlock x:Uid="lblLaOra" Margin="0,0,40,0"/>
                         <TimePicker x:Name="tpAlarmTime" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0,0,40,0"  ClockIdentifier="24HourClock" Time="{x:Bind nov.AlarmTime, Converter={StaticResource DateTime2TimeSpan}, Mode=OneWay}"/>
                     </StackPanel>
 
