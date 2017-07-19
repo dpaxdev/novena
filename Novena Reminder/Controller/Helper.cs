@@ -87,7 +87,12 @@ namespace Novena_Reminder.Controller
 
         }
 
-
+        public static void DeleteNovena(Novena nov)
+        {
+            nov.Deactivate();
+            ManageAlarms(nov);
+            Model.Storage.DeleteNovena(nov.ID);
+        }
         public static void ManageAlarms(Novena nov)
         {
             if (tn == null)

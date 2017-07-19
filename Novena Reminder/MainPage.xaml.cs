@@ -182,7 +182,7 @@ namespace Novena_Reminder
             {
                 foreach (Novena nov in LV.SelectedItems)
                 {
-                    Storage.DeleteNovena(nov.ID);
+                    Helper.DeleteNovena(nov);
                 }
                 ResetListView();
             }            
@@ -226,7 +226,7 @@ namespace Novena_Reminder
             bool DialogResult = await Helper.ShowNovenaDeleteDialog(nov);
             if (DialogResult)
             {
-                Storage.DeleteNovena(nov.ID);
+                Helper.DeleteNovena(nov);
                 ResetListView();              
             }
         }

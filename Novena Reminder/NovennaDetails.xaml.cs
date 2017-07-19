@@ -180,7 +180,7 @@ namespace Novena_Reminder
             bool DialogResult = await Helper.ShowNovenaDeleteDialog(nov);
             if (DialogResult)
             {
-                Storage.DeleteNovena(nov.ID);
+                Helper.DeleteNovena(nov);
                 NavigateToMainPage();
             }
         }
