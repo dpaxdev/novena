@@ -2,7 +2,10 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Windows.ApplicationModel.AppService;
+using Windows.ApplicationModel.DataTransfer;
 using Windows.ApplicationModel.Resources;
+using Windows.Foundation.Collections;
 using Windows.UI.Notifications;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
@@ -13,7 +16,14 @@ namespace Novena_Reminder.Controller
     public static class Helper
     {
         public static ToastNotifier tn;
-
+        public static bool IsMobile
+        {
+            get
+            {
+                var qualifiers = Windows.ApplicationModel.Resources.Core.ResourceContext.GetForCurrentView().QualifierValues;
+                return (qualifiers.ContainsKey("DeviceFamily") && qualifiers["DeviceFamily"] == "Mobile");
+            }
+        }
         public static ResourceLoader loader = new ResourceLoader();
         public static string _t(string stringName)
         {
@@ -48,6 +58,8 @@ namespace Novena_Reminder.Controller
             }
 
         }
+
+
 
         public static async Task<bool> ShowNovenaMassDeleteDialog(int count)
         {
@@ -119,12 +131,12 @@ namespace Novena_Reminder.Controller
                         var Delay = ScheduledAlarmDate.Subtract(CurrentDate);
                         AlarmTime = CurrentDate.AddDays((x - nov.CurrentProgress) + Delay.Days);
                     }
-                    AddScheduledToastNotification(nov.ID, nov.Name, String.Format(_t("s0031"),nov.CurrentProgress.ToString() ) , AlarmTime);
+                    AddScheduledToastNotification(nov.ID, nov.Name, String.Format(_t("s0031"), nov.CurrentProgress.ToString()), AlarmTime, nov.AlarmSound);
                 }
             }
         }
 
-        private static void AddScheduledToastNotification(string group, string title, string contentText, DateTime time)
+        private static void AddScheduledToastNotification(string group, string title, string contentText, DateTime time, string alarmTone = "")
         {
 
             if (time < DateTime.Now) return; //cannot schedule a notification in the past, app would crash...
@@ -142,41 +154,55 @@ namespace Novena_Reminder.Controller
                         BindingGeneric = new ToastBindingGeneric()
                         {
                             Children =
-                        {
-                            new AdaptiveText()
                             {
-                                Text = title,
-                                HintMaxLines = 1
-                            },
+                                new AdaptiveText()
+                                {
+                                    Text = title,
+                                    HintMaxLines = 1
+                                },
 
-                            new AdaptiveText()
-                            {
-                                Text = contentText
+                                new AdaptiveText()
+                                {
+                                    Text = contentText
+                                }
                             }
-                        }
                         }
                     },
                     Scenario = ToastScenario.Reminder,
                     Audio = new ToastAudio()
                     {
-                        Src = new Uri("ms-winsoundevent:Notification.Looping.Alarm"),
-                        Loop = true,
-                        Silent = false
+                        Src = alarmTone == "" ? null : GetSoundUriFromDisplayName(alarmTone),
+                        Loop = true,// new List<string>() { "Default", "IM", "Mail", "Reminder", "SMS" }.Contains(alarmTone) ? false : true,
+                        Silent = alarmTone == "" ? true : false
                     },
                     Actions = new ToastActionsCustom()
                     {
+                        Inputs =
+                        {
+                            new ToastSelectionBox("snoozeTime")
+                            {
+                                DefaultSelectionBoxItemId = "10",
+                                Items =
+                                {
+                                    new ToastSelectionBoxItem("5", String.Format(_t("s0003"), 5)),
+                                    new ToastSelectionBoxItem("10", String.Format(_t("s0003"), 10)),
+                                    new ToastSelectionBoxItem("30", String.Format(_t("s0003"), 30)),
+                                    new ToastSelectionBoxItem("60", _t("s0004")),
+                                    new ToastSelectionBoxItem("120", String.Format(_t("s0005"), 2)),
+                                }
+                            }
+                        },
                         Buttons =
-                    {
-                       new ToastButtonSnooze(),
-                       new ToastButtonDismiss()
-                    }
+                        {
+                            new ToastButtonSnooze()
+                            {
+                                SelectionBoxId = "snoozeTime"
+                            },
+                            new ToastButtonDismiss()
+                        }
                     }
                 };
-
-
-
                 var xml = content.GetXml();
-
                 var scheduledToast = new ScheduledToastNotification(xml, new DateTimeOffset(time))
                 {
                     Group = group
@@ -246,6 +272,17 @@ namespace Novena_Reminder.Controller
             string base64 = Convert.ToBase64String(data, 0, 8).Substring(5, 6);
 
             return base64;
+        }
+
+        public static Uri GetSoundUriFromDisplayName(string displayName)
+        {
+            List<string> Exceptions = new List<string>() { "Default", "IM", "Mail", "Reminder", "SMS" };
+            var uriString = "";
+            if (Exceptions.Contains(displayName))
+                uriString = "ms-winsoundevent:Notification." + displayName;
+            else
+                uriString = "ms-winsoundevent:Notification.Looping." + displayName;
+            return new Uri(uriString);
         }
     }
 
@@ -447,8 +484,9 @@ namespace Novena_Reminder.Controller
             return value;
         }
     }
-
 }
+
+
 
 
 

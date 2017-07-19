@@ -16,6 +16,7 @@
         <controller:RecurrenceToCheckConvert x:Key="Recurrence2Check" />
         <controller:RecurrenceToVisibilityConvert x:Key="Recurrence2Vis" />
         <controller:ComboBoxItemConvert x:Key="ComboBoxItemConvert" />
+        <controller:ComboBoxItemConvert x:Key="AlarmSoundDisplay" />
 
 
         <Style x:Key="tbHighlight"  TargetType="TextBox">
@@ -40,7 +41,7 @@
             <AppBarButton x:Name="ButtonDelete" x:Uid="ButtonDelete"   Click="ButtonDelete_Click">
                 <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE74D;" FontSize="15" Margin="1,3,0,0"  />
             </AppBarButton>
-            <AppBarButton x:Name="ButtonCancel" x:Uid="ButtonCancel" Label="Anuleaza modificari" Click="ButtonCancel_Click">
+            <AppBarButton x:Name="ButtonCancel" x:Uid="ButtonCancel"  Click="ButtonCancel_Click">
                 <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE711;" FontSize="15" Margin="1,3,0,0"  />
             </AppBarButton>
         </CommandBar>
@@ -126,6 +127,23 @@
                     <StackPanel  Visibility="{Binding IsChecked ,ElementName=chkAlarma,Converter={StaticResource Bool2Vis}}" Orientation="vertical" Margin="25,5,0,0">
                         <TextBlock x:Uid="lblLaOra" Margin="0,0,40,0"/>
                         <TimePicker x:Name="tpAlarmTime" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0,0,40,0"  ClockIdentifier="24HourClock" Time="{x:Bind nov.AlarmTime, Converter={StaticResource DateTime2TimeSpan}, Mode=OneWay}"/>
+                        <TextBlock x:Uid="lblSound" Margin="0,0,40,0"/>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock x:Uid="lblAlarmTone" Margin="0,0,40,0"/>
+                            <ComboBox x:Name="cbAlarmSound" SelectedItem="{x:Bind  nov.AlarmSound}" 
+                                  Margin="0,0,10,0" >
+                            </ComboBox>
+
+                            <Button>
+                                <StackPanel Orientation="Horizontal" Tapped="StackPanel_Tapped" >
+                                    <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE768;" FontSize="15" Margin="1,3,5,0"  VerticalAlignment="Center"/>
+                                    <TextBlock x:Uid="lbTest" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Button>
+
+                            <MediaElement x:Name="meTest"></MediaElement>
+                        </StackPanel>
+                        <!--   -->
                     </StackPanel>
 
                 </StackPanel>

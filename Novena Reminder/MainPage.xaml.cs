@@ -19,6 +19,7 @@ using Novena_Reminder.Model;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using Novena_Reminder.Controller;
+using Windows.UI.Notifications;
 
 // The Blank Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=234238
 
@@ -80,9 +81,20 @@ namespace Novena_Reminder
                  {
                      ResetListView();
                      SetMultipleSelectionMode(false);
-
-
+                    // ClearAlarms();
                  };
+        }
+
+        private void ClearAlarms() //for testing purposes only. this method nukes all alarms registred.
+        {
+
+            if (Helper.tn == null)
+                Helper.tn = ToastNotificationManager.CreateToastNotifier();
+            var ScheduledToasts =  Helper.tn.GetScheduledToastNotifications();
+            foreach (ScheduledToastNotification notif in ScheduledToasts)
+            {
+                Helper.tn.RemoveFromSchedule(notif);
+            }
         }
 
         private void LV_LayoutUpdated(object sender, object e)
@@ -91,7 +103,7 @@ namespace Novena_Reminder
                 Initializing = true;
             else
                 Initializing = false;
-            // LV.ItemContainerGenerator.ItemsChanged += ItemContainerGenerator_ItemsChanged;
+            
         }
 
 

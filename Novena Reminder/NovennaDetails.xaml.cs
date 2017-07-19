@@ -3,9 +3,11 @@ using Novena_Reminder.Model;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Windows.Phone.Devices.Notification;
 using Windows.UI.Core;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
+using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Media.Animation;
 using Windows.UI.Xaml.Navigation;
 
@@ -36,6 +38,66 @@ namespace Novena_Reminder
 
             cbDuration.TextChanged += CbDuration_TextChanged;
             cbStartAt.Loaded += CbStartAt_Loaded;
+            cbAlarmSound.Loaded += CbAlarmSound_Loaded;
+        }
+
+        private void CbAlarmSound_Loaded(object sender, RoutedEventArgs e)
+        {
+            PopulateCbAlarmSound();
+        }
+
+        private void PopulateCbAlarmSound()
+        {            
+            List<string> soundsDisplayNames;
+            if (Helper.IsMobile)
+            {
+                soundsDisplayNames = new List<string>() {
+                        _t("s0008"),
+                        "Default",
+                        "IM",
+                        "Mail",
+                        "Reminder",
+                        "SMS",
+                        "Alarm",
+                        "Call"};
+            }
+            else
+            {
+
+                soundsDisplayNames = new List<string>() {
+                        "Default",
+                        "IM",
+                        "Mail",
+                        "Reminder",
+                        "SMS",
+                        "Alarm",
+                        "Alarm2",
+                        "Alarm3",
+                        "Alarm4",
+                        "Alarm5",
+                        "Alarm6",
+                        "Alarm7",
+                        "Alarm8",
+                        "Alarm9",
+                        "Alarm10",
+                        "Call",
+                        "Call2",
+                        "Call3",
+                        "Call4",
+                        "Call5",
+                        "Call6",
+                        "Call7",
+                        "Call8",
+                        "Call9",
+                        "Call10"};
+
+            }
+
+            cbAlarmSound.ItemsSource = soundsDisplayNames;
+            cbAlarmSound.SelectedValue = nov.AlarmSound;
+            if (nov.AlarmSound == "")
+                cbAlarmSound.SelectedValue = _t("s0008");
+
         }
 
         private void CbStartAt_Loaded(object sender, RoutedEventArgs e)
@@ -64,6 +126,7 @@ namespace Novena_Reminder
                 ComboboxSetSelectedValue(cbStartAt, nov.StartAt);
             else
                 ComboboxSetSelectedValue(cbStartAt, 1);
+
         }
 
         private int ParseValueToInt(string text)
@@ -87,6 +150,7 @@ namespace Novena_Reminder
                 nov.Name = _t("s0018");// "Novena";
 
             }
+            if (nov.AlarmSound == null) nov.AlarmSound = "Default";
 
             SystemNavigationManager systemNavigationManager = SystemNavigationManager.GetForCurrentView();
             systemNavigationManager.BackRequested += OnBackRequested;
@@ -120,8 +184,6 @@ namespace Novena_Reminder
                 NavigateToMainPage();
             }
         }
-
-       
 
 
         private void ButtonCancel_Click(object sender, RoutedEventArgs e)
@@ -203,7 +265,7 @@ namespace Novena_Reminder
                     break;
 
             }
-            
+
         }
 
         private void NovenaDetails_DateChanged(object sender, DatePickerValueChangedEventArgs e)
@@ -264,6 +326,7 @@ namespace Novena_Reminder
                 novena.Activate();   //will throw InvalidOperationException in certain cases which we need to catch outside of this method
             novena.Alarm = chkAlarma.IsChecked.Value == true ? true : false;
             novena.AlarmTime = new DateTime(tpAlarmTime.Time.Ticks);
+            novena.AlarmSound = cbAlarmSound.SelectedValue.ToString() == _t("s0008") ? "" : cbAlarmSound.SelectedValue.ToString();
 
             novena.Duration = ParseValueToInt(cbDuration.Text);
             novena.IsActive = togIsActive.IsOn;
@@ -314,9 +377,32 @@ namespace Novena_Reminder
         }
 
         //remap for fast access:
-        private string _t (string stringName)
+        private string _t(string stringName)
         {
             return Helper._t(stringName);
+        }
+
+        private void StackPanel_Tapped(object sender, Windows.UI.Xaml.Input.TappedRoutedEventArgs e)
+        {
+
+            // meTest.AutoPlay = true;
+            if (cbAlarmSound.SelectedValue == null)
+                return;
+            if (cbAlarmSound.SelectedValue.ToString() == _t("s0008"))
+            {
+                if (Helper.IsMobile)
+                {
+                    var v = VibrationDevice.GetDefault();
+                    v.Vibrate(TimeSpan.FromMilliseconds(500));
+                }
+            }
+            else
+            {
+                meTest.AutoPlay = true;
+                var soundName = cbAlarmSound.SelectedValue.ToString();
+                meTest.Source = Helper.GetSoundUriFromDisplayName(soundName);
+                meTest.Play();
+            }
         }
     }
 }

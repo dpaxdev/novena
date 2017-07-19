@@ -93,7 +93,6 @@
   </PropertyGroup>
   <ItemGroup>
     <!-- A reference to the entire .Net Framework and Windows SDK are automatically included -->
-    <None Include="ClassDiagram1.cd" />
     <None Include="Novena Reminder_StoreKey.pfx" />
     <None Include="project.json" />
     <PRIResource Include="Strings\de-DE\Resources.resw" />
@@ -184,7 +183,11 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <SDKReference Include="WindowsMobile, Version=10.0.10586.0">
+      <Name>Windows Mobile Extensions for the UWP</Name>
+    </SDKReference>
+  </ItemGroup>
   <ItemGroup>
     <Page Include="MainPage.xaml">
       <SubType>Designer</SubType>

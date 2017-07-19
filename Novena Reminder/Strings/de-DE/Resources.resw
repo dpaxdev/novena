@@ -270,4 +270,25 @@
   <data name="s0026" xml:space="preserve">
     <value>Diese Novene läuft gerade.</value>
   </data>
+  <data name="s0003" xml:space="preserve">
+    <value>{0} Minuten</value>
+  </data>
+  <data name="s0004" xml:space="preserve">
+    <value>1 Stunde</value>
+  </data>
+  <data name="s0005" xml:space="preserve">
+    <value>{0} Stunden</value>
+  </data>
+  <data name="lblAlarmTone.Text" xml:space="preserve">
+    <value>Alarmton</value>
+  </data>
+  <data name="s0007" xml:space="preserve">
+    <value>Systemeinstellung</value>
+  </data>
+  <data name="lbTest.Text" xml:space="preserve">
+    <value>Testen</value>
+  </data>
+  <data name="s0008" xml:space="preserve">
+    <value>Vibrieren</value>
+  </data>
 </root>

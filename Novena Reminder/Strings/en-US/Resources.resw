@@ -270,4 +270,25 @@
   <data name="s0026" xml:space="preserve">
     <value>This novena is currently running.</value>
   </data>
+  <data name="s0003" xml:space="preserve">
+    <value>{0} minutes</value>
+  </data>
+  <data name="s0004" xml:space="preserve">
+    <value>1 hour</value>
+  </data>
+  <data name="s0005" xml:space="preserve">
+    <value>{0} hours</value>
+  </data>
+  <data name="lblAlarmTone.Text" xml:space="preserve">
+    <value>Alarm tone</value>
+  </data>
+  <data name="s0007" xml:space="preserve">
+    <value>Default</value>
+  </data>
+  <data name="lbTest.Text" xml:space="preserve">
+    <value>Test</value>
+  </data>
+  <data name="s0008" xml:space="preserve">
+    <value>Vibrate</value>
+  </data>
 </root>

@@ -270,4 +270,25 @@
   <data name="s0026" xml:space="preserve">
     <value>Aceasta novena este in desfasurare.</value>
   </data>
+  <data name="s0003" xml:space="preserve">
+    <value>{0} minute</value>
+  </data>
+  <data name="s0004" xml:space="preserve">
+    <value>1 ora</value>
+  </data>
+  <data name="s0005" xml:space="preserve">
+    <value>{0} ore</value>
+  </data>
+  <data name="lblAlarmTone.Text" xml:space="preserve">
+    <value>Sunet alarma</value>
+  </data>
+  <data name="s0007" xml:space="preserve">
+    <value>Implicit</value>
+  </data>
+  <data name="lbTest.Text" xml:space="preserve">
+    <value>Test</value>
+  </data>
+  <data name="s0008" xml:space="preserve">
+    <value>Vibreaza</value>
+  </data>
 </root>

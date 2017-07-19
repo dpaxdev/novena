@@ -35,6 +35,7 @@ namespace Novena_Reminder
             StartDate = DateTime.MinValue.ToUniversalTime();
             SchedStartDate = DateTime.MinValue.ToUniversalTime();
             AlarmTime = DateTime.MinValue.ToUniversalTime();
+           
         }
 
         public Novena(string id)
@@ -109,6 +110,8 @@ namespace Novena_Reminder
         public bool IsActive { get; set; }
 
         public bool RecurrenceIsOn { get { return Recurrence != RecurrencePattern.RunOnce; } }
+
+        public string AlarmSound { get;  set; }
 
 
         public bool IsOngoing
@@ -202,6 +205,8 @@ namespace Novena_Reminder
                 return progress;
             }
         }
+
+       
 
         [OnSerializing]
         public void OnSerializing(StreamingContext context)
