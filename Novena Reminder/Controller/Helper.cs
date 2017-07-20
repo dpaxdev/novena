@@ -173,7 +173,7 @@ namespace Novena_Reminder.Controller
                             }
                         }
                     },
-                    Scenario = ToastScenario.Reminder,
+                    Scenario = ToastScenario.Alarm,
                     Audio = new ToastAudio()
                     {
                         Src = alarmTone == "" ? null : GetSoundUriFromDisplayName(alarmTone),

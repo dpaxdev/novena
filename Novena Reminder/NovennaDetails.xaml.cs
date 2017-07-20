@@ -95,7 +95,7 @@ namespace Novena_Reminder
 
             cbAlarmSound.ItemsSource = soundsDisplayNames;
             cbAlarmSound.SelectedValue = nov.AlarmSound;
-            if (nov.AlarmSound == "")
+            if (nov.AlarmSound == "")//this can oly happen on mobile
                 cbAlarmSound.SelectedValue = _t("s0008");
 
         }
