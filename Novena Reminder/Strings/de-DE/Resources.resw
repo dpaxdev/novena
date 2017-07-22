@@ -291,4 +291,7 @@
   <data name="s0008" xml:space="preserve">
     <value>Vibrieren</value>
   </data>
+  <data name="e0004" xml:space="preserve">
+    <value>Startdatum ist in der Vergangenheit eingestellt.</value>
+  </data>
 </root>

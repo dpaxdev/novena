@@ -11,7 +11,7 @@ using Windows.Storage;
 
 namespace Novena_Reminder.Model
 {
-    static class Storage
+    public static class Storage
     {
 
         static string NOV_SETTINGS_PREFIX = "nov";

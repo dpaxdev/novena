@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Windows.ApplicationModel.AppService;
+using Windows.ApplicationModel.Background;
 using Windows.ApplicationModel.DataTransfer;
 using Windows.ApplicationModel.Resources;
 using Windows.Foundation.Collections;
@@ -106,13 +107,13 @@ namespace Novena_Reminder.Controller
                     tn.RemoveFromSchedule(notif);
             }
             //Step 2: decide if we need to add the notifications back;
-            if (nov.IsActive && nov.Alarm && (nov.IsOngoing || nov.SchedStart))
+            if (nov.IsActive && nov.Alarm)
             {
 
                 DateTime CurrentDate = new DateTime(
-                                       DateTime.Now.Year,
-                                       DateTime.Now.Month,
-                                       DateTime.Now.Day,
+                                       DateTime.Today.Year,
+                                       DateTime.Today.Month,
+                                       DateTime.Today.Day,
                                        nov.AlarmTime.Hour,
                                        nov.AlarmTime.Minute,
                                        0
@@ -214,6 +215,30 @@ namespace Novena_Reminder.Controller
                 };
                 tn.AddToSchedule(scheduledToast);
             }
+        }
+
+        public static BackgroundTaskRegistration RegisterBackgroundTask(String taskEntryPoint, String name, IBackgroundTrigger trigger, IBackgroundCondition condition, bool needAccess = true)
+        {
+            if (needAccess)
+            {
+                // If the user denies access, the task will not run.
+                var requestTask = BackgroundExecutionManager.RequestAccessAsync();
+            }
+
+            var builder = new BackgroundTaskBuilder();
+
+            builder.Name = name;
+            builder.TaskEntryPoint = taskEntryPoint;
+            builder.SetTrigger(trigger);
+
+            if (condition != null)
+            {
+                builder.AddCondition(condition);
+            }
+
+            BackgroundTaskRegistration task = builder.Register();            
+
+            return task;
         }
 
         public static void ShowDialog(string title, string content)
@@ -488,6 +513,8 @@ namespace Novena_Reminder.Controller
         {
             return value;
         }
+
+
     }
 }
 

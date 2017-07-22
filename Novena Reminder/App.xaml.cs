@@ -1,4 +1,5 @@
-﻿using Novena_Reminder.Model;
+﻿using Novena_Reminder.Controller;
+using Novena_Reminder.Model;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -7,6 +8,7 @@ using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
 using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
+using Windows.ApplicationModel.Background;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.UI.Xaml;
@@ -24,6 +26,8 @@ namespace Novena_Reminder
     /// </summary>
     sealed partial class App : Application
     {
+        public const string BackgroundTaskName = "NovenaBackgroundTask";
+
         /// <summary>
         /// Initializes the singleton application object.  This is the first line of authored code
         /// executed, and as such is the logical equivalent of main() or WinMain().
@@ -48,15 +52,22 @@ namespace Novena_Reminder
             }
 #endif
 
-            //Do Maintenance
+            //Do Maintenance on app launch
             ObservableCollection<Novena> Novenas = Storage.GetCollection();
-            for (int x = 0; x < Novenas.Count; x++)
+            foreach (Novena nov in Novenas)
             {
-                var nov = Novenas[x];
-                nov.Maintenance();
-                Novenas[x] = nov;
+                if (nov.Maintenance())
+                    Storage.SaveNovena(nov);
+                if (nov.Alarm)
+                {
+                    Helper.ManageAlarms(nov);
+                }
             }
-            
+            var task = Helper.RegisterBackgroundTask("BackgroundTaskManager.NovenaBackgroundMainenanceTask",
+                                                                   BackgroundTaskName,
+                                                                   new TimeTrigger(60*24, false),
+                                                                   null);
+
             Frame rootFrame = Window.Current.Content as Frame;
 
             // Do not repeat app initialization when the Window already has content,
@@ -90,6 +101,7 @@ namespace Novena_Reminder
                 Window.Current.Activate();
             }
         }
+
 
         /// <summary>
         /// Invoked when Navigation to a certain page fails

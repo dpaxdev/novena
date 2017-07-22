@@ -300,7 +300,7 @@ namespace Novena_Reminder
             }
             catch (InvalidOperationException ex)
             {
-                Helper.ShowDialog(_t("e0019"), ex.Message);//"Novena nu poate fi activata"
+                Helper.ShowDialog(_t("e0019"), _t(ex.Message));//"Novena nu poate fi activata"
                 togIsActive.IsOn = false;
             }
             if (success == true)

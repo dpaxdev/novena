@@ -81,7 +81,7 @@ namespace Novena_Reminder
                  {
                      ResetListView();
                      SetMultipleSelectionMode(false);
-                    // ClearAlarms();
+                     // ClearAlarms();
                  };
         }
 
@@ -90,7 +90,7 @@ namespace Novena_Reminder
 
             if (Helper.tn == null)
                 Helper.tn = ToastNotificationManager.CreateToastNotifier();
-            var ScheduledToasts =  Helper.tn.GetScheduledToastNotifications();
+            var ScheduledToasts = Helper.tn.GetScheduledToastNotifications();
             foreach (ScheduledToastNotification notif in ScheduledToasts)
             {
                 Helper.tn.RemoveFromSchedule(notif);
@@ -103,7 +103,7 @@ namespace Novena_Reminder
                 Initializing = true;
             else
                 Initializing = false;
-            
+
         }
 
 
@@ -122,6 +122,8 @@ namespace Novena_Reminder
                 LV.ItemsSource = null;
             LV.ItemsSource = Novenas;
         }
+
+
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
@@ -185,7 +187,7 @@ namespace Novena_Reminder
                     Helper.DeleteNovena(nov);
                 }
                 ResetListView();
-            }            
+            }
         }
 
         private void OnItemClick(object sender, ItemClickEventArgs e)
@@ -227,7 +229,7 @@ namespace Novena_Reminder
             if (DialogResult)
             {
                 Helper.DeleteNovena(nov);
-                ResetListView();              
+                ResetListView();
             }
         }
 
@@ -236,20 +238,15 @@ namespace Novena_Reminder
             ShowItemContextMenu(sender);
         }
 
-
-
         private void TgEnabledToggle_Loaded(object sender, RoutedEventArgs e)
         {
-
             var tg = sender as ToggleSwitch;
-
             tg.Toggled += TgEnabledToggle_Toggled;
         }
 
 
         private void TgEnabledToggle_Toggled(object sender, RoutedEventArgs e)
         {
-
             var tg = sender as ToggleSwitch;
             var nov = tg.DataContext as Novena;
             if (nov == null) { return; }//have to investigate why is null.
@@ -262,18 +259,16 @@ namespace Novena_Reminder
 
             if (tg.IsOn)
             {
-                nov.Activate();
-                Storage.SaveNovena(nov);
-                ResetListView();
-
                 try
                 {
-
+                    nov.Activate();
+                    Storage.SaveNovena(nov);
+                    ResetListView();
 
                 }
                 catch (Exception ex)
                 {
-                    Helper.ShowDialog(_t("e0019"), ex.Message);//"Novena nu poate fi activata"
+                    Helper.ShowDialog(_t("e0019"), _t(ex.Message));//"Novena nu poate fi activata"
                     tg.IsOn = false;
                 }
             }

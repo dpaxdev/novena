@@ -291,4 +291,7 @@
   <data name="s0008" xml:space="preserve">
     <value>Vibreaza</value>
   </data>
+  <data name="e0004" xml:space="preserve">
+    <value>Data de inceput este programata in trecut.</value>
+  </data>
 </root>

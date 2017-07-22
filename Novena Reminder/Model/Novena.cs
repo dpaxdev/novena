@@ -44,34 +44,58 @@ namespace Novena_Reminder
             InitializeDateTimeFields();
         }
 
-        public void Maintenance()
+        public bool Maintenance()
         {
+            bool changed = false;// we change this flag to notify the novena has changed and should be saved.
             if (IsActive)
             {
+
+                //check if novena is active but hasn't started yet
                 if (StartDate == DateTime.MinValue.ToUniversalTime())
                 {
+                    //if it is scheduled we need to check if it shouldn't start by now
                     if (SchedStart)
                     {
-                        if (SchedStartDate <= DateTime.Now)
+                        if (SchedStartDate <= DateTime.Today)
                         {
+                            //so it should've started already or it should start now
+                            //this also takes care of the case when the device has been off 
+                            //and the novena should have started in the meantime.
                             StartDate = SchedStartDate;
+                            changed = true;
                         }
                     }
                     else
                     {
-                        StartDate = DateTime.Now;
+                        //there is no scheduled start, the StartDate is just not set.
+                        //this happens usually when the novena has just been activated
+                        StartDate = DateTime.Today;
+                        changed = true;
                     }
                 }
+                else //StartDate has been set which means the novena should be ongoing.
+                {
+                    //unless it's not in which case we should deactivate it, because it probably just ended
+                    if (!IsOngoing)
+                    {
+                        Deactivate();
+                        changed = true;
+                    }                   
+                }
             }
+            else //novena is not active
+            {
+                //we do nothing for inactive novenas
+            }
+            return changed;
         }
 
         public void Activate()
         {
 
-            if (SchedStart && SchedStartDate < DateTime.Now)
+            if (SchedStart && SchedStartDate < DateTime.Today)
             {
-                throw new InvalidOperationException("Data de inceput este programata in trecut");
-
+                throw new InvalidOperationException("e0004"); //Data de inceput este programata in trecut
             }
             IsActive = true;
             Maintenance();
@@ -124,7 +148,7 @@ namespace Novena_Reminder
                     return false; //the Novenna hasn't started yet or something's wrong
 
 
-                if (StartDate > DateTime.Now)
+                if (StartDate.Date > DateTime.Today)
                     return false; //it's in the future. some error must have occured => maintenance should be done.
 
                var days = DaysCompleted;
@@ -181,10 +205,10 @@ namespace Novena_Reminder
                 {
                     return 0; //no progress to report for a Novenna that hasn't started yet                
                 }
-                if (StartDate > DateTime.Now)
+                if (StartDate > DateTime.Today)
                     return 0; //it's in the future. some error must have occured => maintenance should be done.
 
-                return (DateTime.Now - StartDate).Days + StartAt;
+                return (DateTime.Today - StartDate).Days + StartAt;
             }
         }
         public int CurrentProgress //returns the current day of the novena if novena is active and has already started
