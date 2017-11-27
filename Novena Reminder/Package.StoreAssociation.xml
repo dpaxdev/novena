@@ -358,13 +358,13 @@
     <Language Code="zu-za" InMinimumRequirementSet="true" />
   </SupportedLocales>
   <ProductReservedInfo>
-    <MainPackageIdentityName>32001D-PAX.Novena</MainPackageIdentityName>
+    <MainPackageIdentityName>32001D-PAX.1384971B3A6A</MainPackageIdentityName>
     <ReservedNames>
-      <ReservedName>Novena</ReservedName>
+      <ReservedName>Novena Reminder</ReservedName>
     </ReservedNames>
   </ProductReservedInfo>
   <AccountPackageIdentityNames>
     <MainPackageIdentityName>32001D-PAX.CalendarCrestinGrecoCatolic</MainPackageIdentityName>
   </AccountPackageIdentityNames>
-  <PackageInfoList LandingUrl="https://developer.microsoft.com/dashboard/Application?appId=9NGRD8Z7K0NR" />
+  <PackageInfoList LandingUrl="https://developer.microsoft.com/dashboard/Application?appId=9NS0XP6LQ2P7" />
 </StoreAssociation>

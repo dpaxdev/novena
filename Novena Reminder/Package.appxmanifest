@@ -1,9 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Package xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10" xmlns:mp="http://schemas.microsoft.com/appx/2014/phone/manifest" xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10" IgnorableNamespaces="uap mp">
-  <Identity Name="32001D-PAX.Novena" Publisher="CN=BE2EA9FA-47D2-49BA-A715-AA7F34D99E51" Version="0.9.1.0" />
-  <mp:PhoneIdentity PhoneProductId="3dd3e5b4-c022-4c2c-b71d-6acd270d0d7e" PhonePublisherId="00000000-0000-0000-0000-000000000000" />
+  <Identity Name="32001D-PAX.1384971B3A6A" Publisher="CN=BE2EA9FA-47D2-49BA-A715-AA7F34D99E51" Version="1.0.0.0" />
+  <mp:PhoneIdentity PhoneProductId="84488a21-6c18-402c-956d-2e884cfa4cf6" PhonePublisherId="00000000-0000-0000-0000-000000000000" />
   <Properties>
-    <DisplayName>Novena</DisplayName>
+    <DisplayName>Novena Reminder</DisplayName>
     <PublisherDisplayName>D-PAX</PublisherDisplayName>
     <Logo>Assets\StoreLogo.png</Logo>
   </Properties>
@@ -15,7 +15,7 @@
   </Resources>
   <Applications>
     <Application Id="App" Executable="$targetnametoken$.exe" EntryPoint="Novena_Reminder.App">
-      <uap:VisualElements DisplayName="Novena" Square150x150Logo="Assets\Square150x150Logo.png" Square44x44Logo="Assets\Square44x44Logo.png" Description="Novena Reminder" BackgroundColor="transparent">
+      <uap:VisualElements DisplayName="Novena Reminder" Square150x150Logo="Assets\Square150x150Logo.png" Square44x44Logo="Assets\Square44x44Logo.png" Description="Novena Reminder" BackgroundColor="transparent">
         <uap:LockScreen Notification="badgeAndTileText" BadgeLogo="Assets\LockScreenlogo.png" />
         <uap:DefaultTile Wide310x150Logo="Assets\Wide310x150Logo.png" Square310x310Logo="Assets\LargeTile.png" Square71x71Logo="Assets\SmallTile.png" ShortName="Novena">
           <uap:ShowNameOnTiles>
