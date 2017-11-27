@@ -294,4 +294,13 @@
   <data name="e0004" xml:space="preserve">
     <value>Data de inceput este programata in trecut.</value>
   </data>
+  <data name="lblIntentieNovena.Text" xml:space="preserve">
+    <value>Intentie</value>
+  </data>
+  <data name="s0006" xml:space="preserve">
+    <value>Zilnic</value>
+  </data>
+  <data name="lblDayOfWeek.Text" xml:space="preserve">
+    <value>Repeta numai intr-o anumita zi din saptamana:</value>
+  </data>
 </root>

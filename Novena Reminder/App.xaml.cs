@@ -11,6 +11,7 @@ using Windows.ApplicationModel.Activation;
 using Windows.ApplicationModel.Background;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
+using Windows.Storage;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
@@ -51,12 +52,13 @@ namespace Novena_Reminder
                 this.DebugSettings.EnableFrameRateCounter = false;
             }
 #endif
-
+            //for testing delete all data:
+            //  ApplicationData.Current.ClearAsync().AsTask().GetAwaiter().GetResult();
             //Do Maintenance on app launch
             ObservableCollection<Novena> Novenas = Storage.GetCollection();
             foreach (Novena nov in Novenas)
             {
-                if (nov.Maintenance())
+                if (nov.DoMaintenance())
                     Storage.SaveNovena(nov);
                 if (nov.Alarm)
                 {
@@ -65,7 +67,7 @@ namespace Novena_Reminder
             }
             var task = Helper.RegisterBackgroundTask("BackgroundTaskManager.NovenaBackgroundMainenanceTask",
                                                                    BackgroundTaskName,
-                                                                   new TimeTrigger(60*24, false),
+                                                                   new TimeTrigger(60, false),
                                                                    null);
 
             Frame rootFrame = Window.Current.Content as Frame;

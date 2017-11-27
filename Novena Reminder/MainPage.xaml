@@ -110,7 +110,7 @@
                        Padding="0" Width="28"  
                        />
 
-                            <TextBlock x:Name="numRecurrence"   Text="{x:Bind Reps}"
+                            <TextBlock x:Name="numRecurrence"   Text="{x:Bind CurrentIteration}"
                                        Visibility="{x:Bind Recurrence, Converter={StaticResource Recurrence2Vis}, ConverterParameter=RepeatNTimes}"
                                        
                        Grid.Column="0" FontSize="10" 
@@ -119,7 +119,7 @@
                        />
 
                             <TextBlock x:Name="symbolScheduled" 
-                                       Visibility="{x:Bind SchedStart, Converter={StaticResource Bool2Vis}}"
+                                       Visibility="{x:Bind ScheduledStart, Converter={StaticResource Bool2Vis}}"
                                        
                                        HorizontalAlignment="Center" VerticalAlignment="Center"  Grid.Column="1"
                        Text="&#xE787;" FontFamily="Segoe MDL2 Assets" FontSize="22"

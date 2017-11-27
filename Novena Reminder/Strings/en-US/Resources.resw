@@ -294,4 +294,13 @@
   <data name="e0004" xml:space="preserve">
     <value>Starting date is scheduled in the past.</value>
   </data>
+  <data name="lblIntentieNovena.Text" xml:space="preserve">
+    <value>Intention</value>
+  </data>
+  <data name="s0006" xml:space="preserve">
+    <value>Daily</value>
+  </data>
+  <data name="lblDayOfWeek.Text" xml:space="preserve">
+    <value>Repeat only in a certain day of the week</value>
+  </data>
 </root>

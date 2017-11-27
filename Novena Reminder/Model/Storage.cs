@@ -15,7 +15,7 @@ namespace Novena_Reminder.Model
     {
 
         static string NOV_SETTINGS_PREFIX = "nov";
-        static ApplicationDataContainer localSettings = ApplicationData.Current.RoamingSettings;
+        static ApplicationDataContainer roamingSettings = ApplicationData.Current.RoamingSettings;
         static Encoding Enc = Encoding.UTF8;
 
 
@@ -61,7 +61,10 @@ namespace Novena_Reminder.Model
             if (nov == null || nov.Length == 0)
                 return null;
             Stream stream = String2Stream(nov);
-            DataContractJsonSerializer json = new DataContractJsonSerializer(typeof(Novena));
+            DataContractJsonSerializer json = new DataContractJsonSerializer(typeof(Novena),
+                                                    new DataContractJsonSerializerSettings(){
+                                                        SerializeReadOnlyTypes = false
+                                                    });
             return (Novena)json.ReadObject(stream);
         }
 
@@ -72,20 +75,7 @@ namespace Novena_Reminder.Model
             if (!nov.IsActive)
             {
                 nov.StartDate = DateTime.MinValue;
-            }
-            /*
-            PropertyInfo[] properties = typeof(Novena).GetProperties();
-            foreach (PropertyInfo property in properties)
-            {
-                if (property.GetType() == typeof(DateTime))
-                {
-                    if ((DateTime)property.GetValue(nov) == DateTime.MinValue)
-                    {
-                        property.SetValue(nov, DateTime.MinValue.ToUniversalTime());
-                    }
-                }
-            }
-            */
+            }           
             var Serialized = SerializeNovena(nov);
             WriteSetting(NOV_SETTINGS_PREFIX + nov.ID, Serialized);
         }
@@ -93,7 +83,10 @@ namespace Novena_Reminder.Model
         private static string SerializeNovena(Novena nov)
         {
             Stream stream = new MemoryStream();
-            DataContractJsonSerializer json = new DataContractJsonSerializer(nov.GetType());
+            DataContractJsonSerializer json = new DataContractJsonSerializer(nov.GetType(), 
+                                                    new DataContractJsonSerializerSettings(){
+                                                        SerializeReadOnlyTypes = false}
+                                                    );
             json.WriteObject(stream, nov);
             return Stream2String(stream);
         }
@@ -104,16 +97,15 @@ namespace Novena_Reminder.Model
         }
 
         private static List<string> ReadSerializedNovenas()
-        {
-
+        {           
             List<string> SerializedNovenas = new List<string>();
 
-            foreach (string key in localSettings.Values.Keys)
+            foreach (string key in roamingSettings.Values.Keys)
             {
                 if (key.StartsWith(NOV_SETTINGS_PREFIX))
                 {
                    // localSettings.Values.Remove(key);
-                    SerializedNovenas.Add(localSettings.Values[key] as string);
+                    SerializedNovenas.Add(roamingSettings.Values[key] as string);
                 }
             }
 
@@ -123,18 +115,18 @@ namespace Novena_Reminder.Model
 
         public static void WriteSetting(string key, string value)
         {
-            localSettings.Values[key] = value;
+            roamingSettings.Values[key] = value;
         }
         public static string ReadSetting(string v)
         {
-            return localSettings.Values[v] as string;
+            return roamingSettings.Values[v] as string;
         }
 
         public static void DeleteSetting(string v)
         {
-            if (localSettings.Values.ContainsKey(v))
+            if (roamingSettings.Values.ContainsKey(v))
             {
-                localSettings.Values.Remove(v);
+                roamingSettings.Values.Remove(v);
             }
         }
 
@@ -152,4 +144,5 @@ namespace Novena_Reminder.Model
         }
 
     }
+   
 }

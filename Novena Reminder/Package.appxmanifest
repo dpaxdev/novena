@@ -27,12 +27,12 @@
         <uap:SplashScreen Image="Assets\SplashScreen.png" />
       </uap:VisualElements>
       <Extensions>
-        <uap:Extension Category="windows.alarm" />
         <Extension Category="windows.backgroundTasks" EntryPoint="BackgroundTaskManager.NovenaBackgroundMainenanceTask">
           <BackgroundTasks>
             <Task Type="timer" />
           </BackgroundTasks>
         </Extension>
+        <uap:Extension Category="windows.alarm" />
       </Extensions>
     </Application>
   </Applications>

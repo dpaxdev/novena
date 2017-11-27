@@ -17,7 +17,7 @@
         <controller:RecurrenceToVisibilityConvert x:Key="Recurrence2Vis" />
         <controller:ComboBoxItemConvert x:Key="ComboBoxItemConvert" />
         <controller:ComboBoxItemConvert x:Key="AlarmSoundDisplay" />
-
+        <controller:IntToWeekdayConverter x:Key="Int2Weekday" />
 
         <Style x:Key="tbHighlight"  TargetType="TextBox">
             <Setter Property="BorderBrush" Value="Red" />
@@ -80,7 +80,7 @@
                     <Run x:Uid="lblRepetitia"/>
                     <Run Text="{x:Bind nov.CurrentIteration}"/>
                     <Run x:Uid="lblDin" />
-                    <Run Text="{x:Bind nov.Reps}"/>
+                    <Run Text="{x:Bind nov.Repetitions}"/>
 
                     </TextBlock>
                     <TextBlock x:Name="lblCurrentIteration"   
@@ -91,36 +91,23 @@
                 </StackPanel>
                 <StackPanel Orientation="Vertical" >
 
-                    <TextBlock  x:Uid="lblNumeNovena"  TextWrapping="Wrap"  VerticalAlignment="Top"/>
+                    <TextBlock  x:Uid="lblNumeNovena" Padding="0,8,0,2" TextWrapping="Wrap"  VerticalAlignment="Top"/>
                     <TextBox x:Name="txtNume" TextWrapping="Wrap" Text="{x:Bind nov.Name}" VerticalAlignment="Top" 
                              Margin="0,0,0,0" Height="19"/>
+                    <TextBlock  x:Uid="lblIntentieNovena"  Padding="0,8,0,2" TextWrapping="Wrap"  VerticalAlignment="Top"/>
+                    <TextBox x:Name="txtIntentie" TextWrapping="Wrap" Text="{x:Bind nov.Intention}" VerticalAlignment="Top" 
+                             Margin="0,0,0,0" Height="54"/>
 
-                    <TextBlock x:Uid="lblDuration" TextWrapping="Wrap"  VerticalAlignment="Top"/>
-                    <TextBox x:Name="cbDuration"   IsEnabled="{x:Bind nov.IsOngoing, Converter={StaticResource InvertBoolean}}"
+                    <TextBlock x:Uid="lblDuration"  Padding="0,8,0,2" TextWrapping="Wrap"  VerticalAlignment="Top"/>
+                    <TextBox x:Name="txtDuration"   IsEnabled="{x:Bind nov.IsOngoing, Converter={StaticResource InvertBoolean}}"
                              VerticalAlignment="Stretch" Width="80" Text="{x:Bind nov.Duration, Mode=OneWay}" HorizontalAlignment="Left"
                              InputScope="Digits"
                              />
-                    <TextBlock x:Uid="lblStartAt" TextWrapping="Wrap"  VerticalAlignment="Top"/>
-                    <ComboBox x:Name="cbStartAt"  IsEnabled="{x:Bind nov.IsOngoing, Converter={StaticResource InvertBoolean}}"  VerticalAlignment="Stretch" Width="80" SelectedItem="{x:Bind nov.StartAt, Mode=OneWay, Converter={StaticResource ComboBoxItemConvert}}" />
-
-                    <CheckBox x:Name="chkRepeat" x:Uid="chkRepeat" IsChecked="{x:Bind nov.RecurrenceIsOn, Converter={StaticResource NullBool2Bool}}"  HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="0,20,0,0"/>
-
-                    <StackPanel  Margin="25,5,0,0" Visibility="{Binding IsChecked ,ElementName=chkRepeat,Converter={StaticResource Bool2Vis}}">
-                        <RadioButton x:Name="rbInfiniteLoop" x:Uid="rbInfiniteLoop"  IsChecked="{x:Bind nov.Recurrence, Converter={StaticResource Recurrence2Check}, ConverterParameter=Loop}" Content="Repetare continua" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="0" GroupName="RepetitionType" />
-
-                        <StackPanel Orientation="Horizontal">
-                            <RadioButton x:Name="rbNtimes" x:Uid="rbNtimes_pre" IsChecked="{x:Bind nov.Recurrence, Converter={StaticResource Recurrence2Check}, ConverterParameter=RepeatNTimes}" Content="De " VerticalAlignment="Center" Margin="0"  Width="55" MinWidth="0" GroupName="RepetitionType"/>
-                            <TextBox x:Name="cbRepeatNTimes" Text="{x:Bind nov.Reps}" InputScope="Digits" HorizontalAlignment="Left"  VerticalAlignment="Center" Width="48" />
-                            <TextBlock x:Uid="rbNtimes_post"  VerticalAlignment="Center" Width="40" Margin="6,0,0,0" />
-                        </StackPanel>
-                    </StackPanel>
-
-                    <CheckBox  x:Name="chkDelayedStart" x:Uid="chkDelayedStart" IsEnabled="{x:Bind nov.IsOngoing, Converter={StaticResource InvertBoolean}}" 
-                               IsChecked="{x:Bind nov.SchedStart, Converter={StaticResource NullBool2Bool}}" Margin="0,20,0,0" Tapped="ChkDelayedStart_Tapped" />
-                    <StackPanel x:Name="stackDelayedStart" Margin="25,5,0,0" Orientation="Vertical"  Visibility="{Binding IsChecked ,ElementName=chkDelayedStart,Converter={StaticResource Bool2Vis}}">
-                        <TextBlock x:Uid="lblData" Margin="0"/>
-                        <DatePicker x:Name="dpScheduledDate"     Width="249" Margin="0" Date="{x:Bind nov.SchedStartDate, Converter={StaticResource DateTime2TimeOffset},Mode=OneWay}" />
-                    </StackPanel>
+                    <TextBlock x:Uid="lblStartAt"  Padding="0,8,0,2" TextWrapping="Wrap"  VerticalAlignment="Top"/>
+                    <ComboBox x:Name="cbStartAt"  IsEnabled="{x:Bind nov.IsOngoing, Converter={StaticResource InvertBoolean}}"  VerticalAlignment="Stretch" 
+                              Width="80" SelectedItem="{x:Bind nov.StartAt, Mode=OneWay, Converter={StaticResource ComboBoxItemConvert}}" />
+                    <TextBlock x:Uid="lblDayOfWeek"  Padding="0,8,0,2" TextWrapping="Wrap" VerticalAlignment="Top"/>
+                    <ComboBox x:Name="cbDayOfWeek"  SelectedItem="{x:Bind nov.Weekday, Converter={StaticResource Int2Weekday}, Mode=OneWay}" HorizontalAlignment="Left"/>
 
                     <CheckBox x:Name="chkAlarma" x:Uid="chkAlarma" IsChecked="{x:Bind nov.Alarm, Converter={StaticResource NullBool2Bool}}" 
                               Width="250" Margin="0,20,0,0"/>
@@ -140,11 +127,30 @@
                                     <TextBlock x:Uid="lbTest" VerticalAlignment="Center"/>
                                 </StackPanel>
                             </Button>
-
-                            <MediaElement x:Name="meTest"></MediaElement>
+                            <MediaElement x:Name="meTest" AutoPlay="True"></MediaElement>
                         </StackPanel>
-                        <!--   -->
                     </StackPanel>
+
+                    <CheckBox x:Name="chkRepeat" Checked="ChkRepeat_Checked" x:Uid="chkRepeat" IsChecked="{x:Bind nov.RecurrenceIsOn, Converter={StaticResource NullBool2Bool}}"  HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="0,20,0,0"/>
+
+                    <StackPanel  Margin="25,5,0,0" Visibility="{Binding IsChecked ,ElementName=chkRepeat,Converter={StaticResource Bool2Vis}}">
+                        <RadioButton x:Name="rbInfiniteLoop" x:Uid="rbInfiniteLoop"  IsChecked="{x:Bind nov.Recurrence, Converter={StaticResource Recurrence2Check}, ConverterParameter=Loop}" Content="Repetare continua" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="0" GroupName="RepetitionType" />
+
+                        <StackPanel Orientation="Horizontal">
+                            <RadioButton x:Name="rbNtimes" x:Uid="rbNtimes_pre" IsChecked="{x:Bind nov.Recurrence, Converter={StaticResource Recurrence2Check}, ConverterParameter=RepeatNTimes}" Content="De " VerticalAlignment="Center" Margin="0"  Width="55" MinWidth="0" GroupName="RepetitionType"/>
+                            <TextBox x:Name="cbRepeatNTimes" Text="{x:Bind nov.Repetitions}" InputScope="Digits" HorizontalAlignment="Left"  VerticalAlignment="Center" Width="48" />
+                            <TextBlock x:Uid="rbNtimes_post"  VerticalAlignment="Center" Width="40" Margin="6,0,0,0" />
+                        </StackPanel>
+                    </StackPanel>
+
+                    <CheckBox  x:Name="chkDelayedStart" x:Uid="chkDelayedStart" IsEnabled="{x:Bind nov.IsOngoing, Converter={StaticResource InvertBoolean}}" 
+                               IsChecked="{x:Bind nov.ScheduledStart, Converter={StaticResource NullBool2Bool}}" Margin="0,20,0,0" Tapped="ChkDelayedStart_Tapped" />
+                    <StackPanel x:Name="stackDelayedStart" Margin="25,5,0,0" Orientation="Vertical"  Visibility="{Binding IsChecked ,ElementName=chkDelayedStart,Converter={StaticResource Bool2Vis}}">
+                        <TextBlock x:Uid="lblData" Margin="0"/>
+                        <DatePicker x:Name="dpScheduledDate"     Width="249" Margin="0" Date="{x:Bind nov.ScheduledStartDate, Converter={StaticResource DateTime2TimeOffset},Mode=OneWay}" />
+                    </StackPanel>
+
+
 
                 </StackPanel>
             </StackPanel>

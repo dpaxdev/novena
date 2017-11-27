@@ -12,49 +12,34 @@ using Novena_Reminder.Model;
 
 namespace BackgroundTaskManager
 {
-    public class NovenaBackgroundMainenanceTask : IBackgroundTask
+    public class NovenaBackgroundMaintenanceTask : IBackgroundTask
     {
-        public const string BackgroundTaskName = "NovenaBackgroundTask";
-
-
-
-
-        IBackgroundTaskInstance _taskInstance = null;
-
+        public  const string BackgroundTaskName = "NovenaBackgroundTask";
+        static ApplicationDataContainer localSettings = ApplicationData.Current.LocalSettings;
         //
         // The Run method is the entry point of a background task.
         //
-        public void Run(IBackgroundTaskInstance taskInstance)
+        public async void Run(IBackgroundTaskInstance taskInstance)
         {
-
-            _taskInstance = taskInstance;
-           Debug.WriteLine("Background " + taskInstance.Task.Name + " Starting...");
-
-            //
-            // Query BackgroundWorkCost
-            // Guidance: If BackgroundWorkCost is high, then perform only the minimum amount
-            // of work in the background task and return immediately.
-            //
+            // Get a deferral, to prevent the task from closing prematurely
+            // while asynchronous code is still running.
+            BackgroundTaskDeferral deferral = taskInstance.GetDeferral();
 
             // read all novenas and perform maintainance tasks to update current progress and deactivate finished novenas
 
-
-
-            //read novenas
-            var Novenas = Storage.GetCollection();
-
-            
-            //perform maintainance
-            foreach(Novena nov in Novenas)
+            if (DateTime.TryParse(localSettings.Values["LastGeneralMaintenanceTime"].ToString(), out DateTime LastMaintenanceTime))
             {
-                if (nov.Maintenance())
-                    Storage.SaveNovena(nov);
-                //also manage alarms 
-                if (nov.Alarm)
-                {
-                    Helper.ManageAlarms(nov);
-                }
+                //if the task has been run today skip it
+                if (LastMaintenanceTime.Date == DateTime.UtcNow.Date)
+                    return;
             }
-        }
-    }
-}
+
+            Helper.DoGeneralMaintenace();
+
+            // Inform the system that the task is finished.
+            deferral.Complete();
+        }//end run
+
+    }//end class backgroundtask
+
+}//end namespace

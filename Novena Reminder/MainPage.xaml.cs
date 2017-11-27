@@ -21,6 +21,7 @@ using System.ComponentModel;
 using Novena_Reminder.Controller;
 using Windows.UI.Notifications;
 
+
 // The Blank Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=234238
 
 namespace Novena_Reminder
@@ -79,8 +80,10 @@ namespace Novena_Reminder
 
             Loaded += (s, e) =>
                  {
+                     Helper.DoGeneralMaintenace();
                      ResetListView();
                      SetMultipleSelectionMode(false);
+                     
                      // ClearAlarms();
                  };
         }

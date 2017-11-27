@@ -10,7 +10,7 @@ using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Media.Animation;
 using Windows.UI.Xaml.Navigation;
-
+using System.Globalization;
 
 // The Blank Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=234238
 
@@ -36,9 +36,30 @@ namespace Novena_Reminder
             // Realize the main page content.
             // FindName("RootPanel");
 
-            cbDuration.TextChanged += CbDuration_TextChanged;
+            txtDuration.Loaded += TxtDuration_Loaded;
             cbStartAt.Loaded += CbStartAt_Loaded;
             cbAlarmSound.Loaded += CbAlarmSound_Loaded;
+            cbDayOfWeek.Loaded += CbDayOfWeek_Loaded;
+        }
+
+        private void CbDayOfWeek_Loaded(object sender, RoutedEventArgs e)
+        {
+            PopulateCbDayOfWeek();
+        }
+
+        private void PopulateCbDayOfWeek()
+        {
+            List<string> weekdays = new List<string>(CultureInfo.CurrentCulture.DateTimeFormat.DayNames);
+            weekdays.Insert(0, _t("s0006"));          
+            cbDayOfWeek.ItemsSource = weekdays;
+            cbDayOfWeek.SelectedIndex = nov.Weekday;           
+        }
+
+        private void TxtDuration_Loaded(object sender, RoutedEventArgs e)
+        {
+            if (nov.Duration == 0)
+                txtDuration.Text = "9";
+            txtDuration.TextChanged += TxtDuration_TextChanged;
         }
 
         private void CbAlarmSound_Loaded(object sender, RoutedEventArgs e)
@@ -47,7 +68,7 @@ namespace Novena_Reminder
         }
 
         private void PopulateCbAlarmSound()
-        {            
+        {
             List<string> soundsDisplayNames;
             if (Helper.IsMobile)
             {
@@ -105,6 +126,7 @@ namespace Novena_Reminder
             PopuplateCBStartAt();
         }
 
+        
 
 
         private void ComboboxSetSelectedValue(ComboBox comboBox, object value)
@@ -112,7 +134,7 @@ namespace Novena_Reminder
             comboBox.SelectedItem = value;
         }
 
-        private void CbDuration_TextChanged(object sender, TextChangedEventArgs e)
+        private void TxtDuration_TextChanged(object sender, TextChangedEventArgs e)
         {
             PopuplateCBStartAt();
         }
@@ -121,7 +143,7 @@ namespace Novena_Reminder
 
         private void PopuplateCBStartAt()
         {
-            Helper.PopulateComboboxWithIntInterval(cbStartAt, 1, ParseValueToInt(cbDuration.Text), 1);
+            Helper.PopulateComboboxWithIntInterval(cbStartAt, 1, ParseValueToInt(txtDuration.Text), 1);
             if (nov.StartAt > 0)
                 ComboboxSetSelectedValue(cbStartAt, nov.StartAt);
             else
@@ -211,20 +233,20 @@ namespace Novena_Reminder
                 Errors.Add(_t("e0026"), txtNume);//"Specificati un nume pentru novena."
             }
 
-            if (cbDuration.Text == "")
+            if (txtDuration.Text == "")
             {
-                Errors.Add(_t("e0001"), cbDuration);//"Indicati durata in zile a novenei."
+                Errors.Add(_t("e0001"), txtDuration);//"Indicati durata in zile a novenei."
             }
             else
             {
-                var isInt = int.TryParse(cbDuration.Text, out int duration);
+                var isInt = int.TryParse(txtDuration.Text, out int duration);
                 if (!isInt)
-                    Errors.Add(_t("e0002"), cbDuration);//"Durata novenei trebuie sa fie un numar."
+                    Errors.Add(_t("e0002"), txtDuration);//"Durata novenei trebuie sa fie un numar."
                 else if (duration <= 0)
-                    Errors.Add(_t("e0003"), cbDuration);//"Durata novenei trebuie sa fie mai mare decat 0."
+                    Errors.Add(_t("e0003"), txtDuration);//"Durata novenei trebuie sa fie mai mare decat 0."
             }
             if (chkDelayedStart.IsChecked == true && dpScheduledDate.Date < DateTime.Today)
-                Errors.Add(_t("e0005"), cbDuration);//"Ati ales inceperea cu intarziere a novenei. Nu puteti programa inceperea novenei in trecut, alegeti o data din viitor."
+                Errors.Add(_t("e0005"), txtDuration);//"Ati ales inceperea cu intarziere a novenei. Nu puteti programa inceperea novenei in trecut, alegeti o data din viitor."
 
 
             if (Errors.Count > 0)
@@ -328,34 +350,39 @@ namespace Novena_Reminder
             novena.AlarmTime = new DateTime(tpAlarmTime.Time.Ticks);
             novena.AlarmSound = cbAlarmSound.SelectedValue.ToString() == _t("s0008") ? "" : cbAlarmSound.SelectedValue.ToString();
 
-            novena.Duration = ParseValueToInt(cbDuration.Text);
+            novena.Duration = ParseValueToInt(txtDuration.Text);
             novena.IsActive = togIsActive.IsOn;
             novena.Name = txtNume.Text;
+            novena.Intention = txtIntentie.Text;
+            novena.Weekday = cbDayOfWeek.SelectedIndex;
             //get recurrence type and repetitions no.
             if (chkRepeat.IsChecked == true)
             {
                 if (rbInfiniteLoop.IsChecked == true)
                 {
                     novena.Recurrence = Novena.RecurrencePattern.Loop;
-                    novena.Reps = 0;
+                    novena.Repetitions = 0;
                 }
                 if (rbNtimes.IsChecked == true)
                 {
 
-                    novena.Reps = ParseValueToInt(cbRepeatNTimes.Text);
+                    novena.Repetitions = ParseValueToInt(cbRepeatNTimes.Text);
                     novena.Recurrence = Novena.RecurrencePattern.RepeatNTimes;
                 }
             }
             else
             {
                 novena.Recurrence = Novena.RecurrencePattern.RunOnce;
-                novena.Reps = 0;
+                novena.Repetitions = 0;
             }
 
-            novena.SchedStart = chkDelayedStart.IsChecked == true;
-            novena.SchedStartDate = new DateTime(dpScheduledDate.Date.Ticks);
+            novena.ScheduledStart = chkDelayedStart.IsChecked == true;
+            novena.ScheduledStartDate = new DateTime(dpScheduledDate.Date.Ticks);
 
             novena.StartAt = Helper.Combobox2Int(cbStartAt);
+
+            //a final step: do some maintainance
+            novena.DoMaintenance();
             return novena;
 
         }
@@ -364,7 +391,6 @@ namespace Novena_Reminder
         {
             var chk = sender as CheckBox;
 
-
             if (chk.IsChecked == true && dpScheduledDate.Date < DateTime.Today)
             {
                 dpScheduledDate.Date = DateTime.Today;
@@ -372,7 +398,7 @@ namespace Novena_Reminder
 
             if (chk.IsChecked == false)
             {
-                dpScheduledDate.Date = nov.SchedStartDate;
+                dpScheduledDate.Date = nov.ScheduledStartDate;
             }
         }
 
@@ -403,6 +429,33 @@ namespace Novena_Reminder
                 meTest.Source = Helper.GetSoundUriFromDisplayName(soundName);
                 meTest.Play();
             }
+        }
+
+        private void ChkRepeat_Checked(object sender, RoutedEventArgs e)
+        {
+            var chk = sender as CheckBox;
+            if (chk.IsChecked == true)
+            {
+                if (nov.Repetitions == 0 && cbRepeatNTimes.Text == "0")
+                    cbRepeatNTimes.Text = "2";
+                if (rbInfiniteLoop.IsChecked != true && rbNtimes.IsChecked != true)
+                {
+                    //we set a default recurrence method
+                    rbInfiniteLoop.IsChecked = true;
+                }
+            }
+            else
+            {
+                if (nov.Recurrence == Novena.RecurrencePattern.RunOnce)
+                {
+                    if (nov.Repetitions == 0 && cbRepeatNTimes.Text != "0")
+                        cbRepeatNTimes.Text = "0";
+                    //we unset any default values we might have set when recurrence is unchecked
+                    rbInfiniteLoop.IsChecked = false;
+                    rbNtimes.IsChecked = false;
+                }
+            }
+            
         }
     }
 }

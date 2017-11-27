@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Windows.Data.Xml.Dom;
 using Windows.ApplicationModel.AppService;
 using Windows.ApplicationModel.Background;
 using Windows.ApplicationModel.DataTransfer;
@@ -11,6 +12,8 @@ using Windows.UI.Notifications;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Data;
+using System.Globalization;
+using Novena_Reminder.Model;
 
 namespace Novena_Reminder.Controller
 {
@@ -88,11 +91,122 @@ namespace Novena_Reminder.Controller
 
         }
 
+        public static void DoGeneralMaintenace()
+        {
+            //read novenas
+            var Novenas = Storage.GetCollection();
+
+            //perform maintainance
+            foreach (Novena nov in Novenas)
+            {
+                if (nov.DoMaintenance())
+                    Storage.SaveNovena(nov);
+                //also manage alarms 
+                if (nov.Alarm)
+                {
+                    Helper.ManageAlarms(nov);
+                }
+                Helper.UpdateLiveTile();
+            }
+
+            //if we got to here and task has not been stopped we can register the maintenance as done and save a timestamp to avoid running again today.
+            Storage.WriteSetting("LastGeneralMaintenanceTime", DateTime.UtcNow.ToString());
+        }
+
+
+        public static void UpdateLiveTile()
+        {
+            // Create a tile update manager for the specified syndication feed.
+            var updater = TileUpdateManager.CreateTileUpdaterForApplication();
+            updater.EnableNotificationQueue(true);
+            updater.Clear();
+
+            // Keep track of the number feed items that get tile notifications.
+           
+            XmlDocument tileXml = TileUpdateManager.GetTemplateContent(TileTemplateType.TileSquare150x150Text01);
+            //var xmlstr = tileXml.GetXml(); //debugging variable
+            var novs = Storage.GetCollection();
+
+            // Create a tile notification for each feed item.
+            int i = 0;
+            foreach (var nov in novs)
+            {
+
+                //get the next alarm
+                var TextRow = ""; //this is where we build the notification string for each individual novena
+                if (tn == null)
+                    tn = ToastNotificationManager.CreateToastNotifier();
+
+                var Notifications = tn.GetScheduledToastNotifications();
+                //Step 1: delete all notifications for this Novena if any
+
+                ScheduledToastNotification firstAlarm = null;
+                foreach (ScheduledToastNotification notif in Notifications)
+                {
+                    if (notif.Group == nov.ID)
+                    {
+                        firstAlarm = notif;
+                        break;
+                    }
+                }
+
+
+                if (firstAlarm != null)
+                {
+                    DateTime dt = firstAlarm.DeliveryTime.DateTime;
+                    if (dt.Day != DateTime.Now.Day)
+                        TextRow += String.Format("{0:dd.MM} ", dt);
+                    else
+                        TextRow += String.Format("{0:HH:mm} ", dt);
+
+                }
+
+                //  var AlarmTime = nov.AlarmTime;
+                 TextRow += nov.CurrentProgress + " - " + nov.Name;
+                if (!nov.IsOngoing)
+                    continue;
+                tileXml.GetElementsByTagName("text")[i++].InnerText = TextRow;
+              
+                if (i == 4) //we're only interested in the first 4 novenas since the output space of the tile is limited to 4 lines
+                    break;                  
+            }                          
+            
+            // Create a new tile notification.
+            updater.Update(new TileNotification(tileXml));
+        }
+
+       public static int CountDays(DayOfWeek day, DateTime start, DateTime end)
+        {
+            TimeSpan ts = end - start;                       // Total duration
+            int count = (int)Math.Floor(ts.TotalDays / 7);   // Number of whole weeks
+            int remainder = (int)(ts.TotalDays % 7);         // Number of remaining days
+            int sinceLastDay = (int)(end.DayOfWeek - day);   // Number of days since last [day]
+            if (sinceLastDay < 0) sinceLastDay += 7;         // Adjust for negative days since last [day]
+
+            // If the days in excess of an even week are greater than or equal to the number days since the last [day], then count this one, too.
+            if (remainder >= sinceLastDay) count++;
+
+            return count;
+        }
+
+        public static int GetTotalDurationOfWeekdaysOccurence(int weekday, int occurences, int startAt)
+        {
+
+            int total = 7 * occurences;
+            int dif = weekday - startAt;
+            if (dif < 0)
+                dif += 7;
+            total += dif;
+
+                return total;
+          
+        }
+
         public static void DeleteNovena(Novena nov)
         {
             nov.Deactivate();
             ManageAlarms(nov);
-            Model.Storage.DeleteNovena(nov.ID);
+            Storage.DeleteNovena(nov.ID);
         }
         public static void ManageAlarms(Novena nov)
         {
@@ -119,27 +233,60 @@ namespace Novena_Reminder.Controller
                                        0
                                    );
 
-                //We schedule alarms for the whole next run of the Novena
-                for (int x = nov.CurrentProgress; x < nov.Duration; x++)
+                //We schedule alarms for the whole next run of the Novena 
+
+                var AlarmsCount = Math.Min(nov.Duration, 10);
+                for (int x = nov.CurrentProgress; x < AlarmsCount; x++)
                 {
+                    int AlarmOffset = x - nov.CurrentProgress;
 
                     DateTime AlarmTime;
 
                     if (nov.IsOngoing)
                     {
-                        AlarmTime = CurrentDate.AddDays(x - nov.CurrentProgress);
+                        if (nov.Weekday == 0)
+                        {
+                            AlarmTime = CurrentDate.AddDays(AlarmOffset);
+                        }
+                        else
+                        {
+                            int firstWeekday = GetDaysTillFirstOccurenceOfWeekday(nov.Weekday - 1);
+                            AlarmTime = CurrentDate.AddDays(firstWeekday + AlarmOffset * 7);
+                        }
+
                     }
                     else
                     {
                         //so we have a scheduled start in the future
                         //determine the first day
-                        var ScheduledAlarmDate = new DateTime(nov.SchedStartDate.Year, nov.SchedStartDate.Month, nov.SchedStartDate.Day, CurrentDate.Hour, CurrentDate.Minute, 0);
+                        var ScheduledAlarmDate = new DateTime(nov.ScheduledStartDate.Year, nov.ScheduledStartDate.Month, nov.ScheduledStartDate.Day, CurrentDate.Hour, CurrentDate.Minute, 0);
                         var Delay = ScheduledAlarmDate.Subtract(CurrentDate);
-                        AlarmTime = CurrentDate.AddDays((x - nov.CurrentProgress) + Delay.Days);
+                        if (nov.Weekday == 0)
+                        {
+                            AlarmTime = CurrentDate.AddDays(AlarmOffset + Delay.Days);                           
+                        }
+                        else
+                        {
+                            int firstWeekday = GetDaysTillFirstOccurenceOfWeekday(nov.Weekday - 1, Delay.Days);
+                            AlarmTime = CurrentDate.AddDays(firstWeekday + AlarmOffset * 7);
+                        }                       
                     }
                     AddScheduledToastNotification(nov.ID, nov.Name, String.Format(_t("s0031"), nov.CurrentProgress.ToString()), AlarmTime, nov.AlarmSound);
                 }
             }
+        }
+        public static int GetDaysTillFirstOccurenceOfWeekday(int weekday)
+        {
+            return GetDaysTillFirstOccurenceOfWeekday(weekday, 0);             
+        }
+        public static int GetDaysTillFirstOccurenceOfWeekday(int weekday, int offset)
+        {
+            int weekdayIn = weekday - (int)(DateTime.Now.AddDays(offset).DayOfWeek);
+
+            if (weekdayIn < 0)
+                weekdayIn += 7;
+
+            return weekdayIn + offset;
         }
 
         private static void AddScheduledToastNotification(string group, string title, string contentText, DateTime time, string alarmTone = "")
@@ -225,10 +372,11 @@ namespace Novena_Reminder.Controller
                 var requestTask = BackgroundExecutionManager.RequestAccessAsync();
             }
 
-            var builder = new BackgroundTaskBuilder();
-
-            builder.Name = name;
-            builder.TaskEntryPoint = taskEntryPoint;
+            var builder = new BackgroundTaskBuilder()
+            {
+                Name = name,
+                TaskEntryPoint = taskEntryPoint
+            };
             builder.SetTrigger(trigger);
 
             if (condition != null)
@@ -313,6 +461,31 @@ namespace Novena_Reminder.Controller
             else
                 uriString = "ms-winsoundevent:Notification.Looping." + displayName;
             return new Uri(uriString);
+        }
+        public static string ConvertIntToWeekday(int value, string language)
+        {
+            if(value == 0)
+                return _t("s0006");
+            CultureInfo ci; 
+            if (language == null ||  new CultureInfo(language) == null)
+                ci = CultureInfo.CurrentCulture;
+            else
+                ci = new CultureInfo(language);
+            return ci.DateTimeFormat.DayNames[value-1];
+        }
+
+        public static int ConvertWeekdayToInt(string value, string language)
+        {
+            CultureInfo ci;
+            if (language == null || new CultureInfo(language) == null)
+                ci = CultureInfo.CurrentCulture;
+            else
+                ci = new CultureInfo(language);
+            int ret = Array.IndexOf(ci.DateTimeFormat.DayNames, value);
+            if (ret <= 0)
+                return 0;
+            else
+                return ret+1;
         }
     }
 
@@ -513,8 +686,31 @@ namespace Novena_Reminder.Controller
         {
             return value;
         }
+    }
 
+    public class IntToWeekdayConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, string language)
+        {
 
+            if (value != null && value is int)
+            {
+                return Helper.ConvertIntToWeekday((int)value, language);
+            }
+            return Helper._t("s0006");
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, string language)
+        {
+            if (value != null && value is string)
+            {
+
+               return  Helper.ConvertWeekdayToInt((string)value, language);
+              
+              
+            }
+            return 0;
+        }
     }
 }
 
