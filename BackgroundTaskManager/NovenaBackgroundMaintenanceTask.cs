@@ -25,7 +25,7 @@ namespace BackgroundTaskManager
             // while asynchronous code is still running.
             BackgroundTaskDeferral deferral = taskInstance.GetDeferral();
 
-            // read all novenas and perform maintainance tasks to update current progress and deactivate finished novenas
+           
 
             if (DateTime.TryParse(localSettings.Values["LastGeneralMaintenanceTime"].ToString(), out DateTime LastMaintenanceTime))
             {
@@ -33,7 +33,7 @@ namespace BackgroundTaskManager
                 if (LastMaintenanceTime.Date == DateTime.UtcNow.Date)
                     return;
             }
-
+            // read all novenas and perform maintainance tasks to update current progress and deactivate finished novenas
             Helper.DoGeneralMaintenace();
 
             // Inform the system that the task is finished.

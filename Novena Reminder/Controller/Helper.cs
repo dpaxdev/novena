@@ -104,9 +104,9 @@ namespace Novena_Reminder.Controller
                 //also manage alarms 
                 if (nov.Alarm)
                 {
-                    Helper.ManageAlarms(nov);
+                    ManageAlarms(nov);
                 }
-                Helper.UpdateLiveTile();
+                UpdateLiveTile();
             }
 
             //if we got to here and task has not been stopped we can register the maintenance as done and save a timestamp to avoid running again today.
